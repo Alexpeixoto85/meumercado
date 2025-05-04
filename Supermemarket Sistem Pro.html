@@ -1,0 +1,3609 @@
+
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supermarket System Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --offer-color: #e74c3c;
+            --offer-bg: #fff0f0;
+            --warning: #f39c12;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f5f6fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .admin-login-btn {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10; /* Ensure button is above other elements */
+        }
+
+        .system-title {
+            margin-top: 0;
+            padding-top: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .grid {
+            display: grid;
+            gap: 15px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        }
+
+        input, button, select, textarea {
+            padding: 12px;
+            margin: 5px 0;
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        button {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        button.warning {
+            background: var(--warning);
+        }
+
+        /* Estilos para a seção de ofertas (agora com fade) */
+        .offers-section {
+            margin: 20px auto; /* Centraliza a seção */
+            position: relative;
+            overflow: hidden;
+            max-width: 800px; /* Limita a largura */
+             /* Adicionado altura mínima para conter os banners */
+            min-height: 250px; /* Ajuste conforme a altura esperada do banner */
+        }
+
+        .offers-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .offers-title {
+            font-size: 24px;
+            color: var(--offer-color);
+            margin: 0;
+        }
+
+        .offers-carousel {
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            /* Ajusta altura para conter o conteúdo absoluto */
+            min-height: 200px; /* Ajuste conforme a altura esperada do banner */
+        }
+
+        .offers-container {
+            display: block; /* Permite que elementos absolutos se sobreponham corretamente */
+            transition: none; /* Remove transição horizontal */
+            width: 100%;
+            position: relative; /* Necessário para posicionar .offer-slide */
+            min-height: 200px; /* Ajuste conforme a altura esperada do banner */
+        }
+
+        .offer-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%; /* Ocupa toda a área do container */
+            display: flex;
+            justify-content: center; /* Centraliza o banner horizontalmente */
+            align-items: center; /* Centraliza o banner verticalmente */
+            opacity: 0; /* Inicialmente invisível */
+            transition: opacity 1s ease-in-out; /* Transição de fade */
+            pointer-events: none; /* Não interage com o mouse quando invisível */
+            box-sizing: border-box;
+            padding: 0 10px; /* Espaçamento lateral */
+        }
+
+        .offer-slide.active {
+            opacity: 1; /* Torna visível */
+            pointer-events: auto; /* Permite interação com o mouse */
+        }
+
+
+        .offer-banner {
+            width: 100%;
+            max-width: 300px;
+            padding: 20px;
+            background: var(--offer-bg);
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 1px solid rgba(231, 76, 60, 0.2);
+            position: relative;
+            overflow: hidden;
+            margin: 0 auto; /* Centraliza o banner dentro do .offer-slide */
+            max-height: 200px; /* Limita a altura do banner */
+            display: flex; /* Usa flex para organizar conteúdo interno */
+            flex-direction: column;
+            justify-content: center; /* Centraliza conteúdo verticalmente */
+            align-items: center; /* Centraliza conteúdo horizontalmente */
+        }
+
+        .offer-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--offer-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            transform: rotate(15deg);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1; /* Garante que o badge fique acima da imagem/texto */
+        }
+
+        .offer-banner img {
+            width: auto; /* Permite que a imagem se ajuste */
+            max-width: 100%; /* Não ultrapassa a largura do banner */
+            height: auto; /* Permite que a altura se ajuste */
+            max-height: 80px; /* Limita a altura da imagem */
+            object-fit: contain;
+            border-radius: 8px;
+            margin: 5px auto; /* Espaçamento e centralização */
+        }
+
+        .offer-name {
+            font-size: 16px; /* Reduz tamanho da fonte */
+            font-weight: bold;
+            margin: 5px 0; /* Espaçamento */
+            color: var(--primary);
+        }
+
+        .offer-price {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 5px; /* Espaçamento */
+        }
+
+        .offer-price .original {
+            text-decoration: line-through;
+            color: #999;
+            font-size: 14px; /* Reduz tamanho da fonte */
+        }
+
+        .offer-price .current {
+            font-size: 20px; /* Reduz tamanho da fonte */
+            font-weight: bold;
+            color: var(--offer-color);
+        }
+
+        .offer-market {
+            font-size: 12px; /* Reduz tamanho da fonte */
+            color: #666;
+            margin-top: 5px; /* Espaçamento */
+        }
+
+
+        .carousel-controls, .carousel-indicators {
+            display: none; /* Oculta controles e indicadores */
+        }
+
+
+        /* Estilos para banners promocionais */
+        .promo-banner {
+            width: 100%;
+            max-width: 300px;
+            padding: 20px;
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            color: white;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s;
+            margin: 0 auto; /* Centraliza o banner dentro do .offer-slide */
+            max-height: 200px; /* Limita a altura do banner */
+            display: flex; /* Usa flex para organizar conteúdo interno */
+            flex-direction: column;
+            justify-content: center; /* Centraliza conteúdo verticalmente */
+            align-items: center; /* Centraliza conteúdo horizontalmente */
+        }
+
+        .promo-banner:hover {
+            transform: translateY(-5px);
+        }
+
+        .promo-banner img {
+            width: auto; /* Permite que a imagem se ajuste */
+            max-width: 100%; /* Não ultrapassa a largura do banner */
+            height: auto; /* Permite que a altura se ajuste */
+            max-height: 80px; /* Limita a altura da imagem */
+            object-fit: contain;
+            border-radius: 8px;
+            margin: 5px auto; /* Espaçamento e centralização */
+        }
+
+        .promo-title {
+            font-size: 18px; /* Reduz tamanho da fonte */
+            font-weight: bold;
+            margin: 5px 0; /* Espaçamento */
+        }
+
+        .promo-text {
+            font-size: 14px; /* Reduz tamanho da fonte */
+            margin: 5px 0; /* Espaçamento */
+        }
+
+         .promo-banner small {
+             font-size: 10px; /* Reduz tamanho da fonte */
+             margin-top: 5px;
+         }
+
+
+        /* Estilos para a aba de marketing */
+        .promo-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .promo-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        /* Estilos para a aba de Backup */
+        .backup-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .backup-controls, .restore-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-start; /* Alinha itens à esquerda */
+        }
+
+        .backup-controls button, .restore-controls button {
+            width: auto; /* Permite que o botão se ajuste ao conteúdo */
+             padding: 10px 15px; /* Ajusta padding */
+        }
+
+        .restore-controls input[type="file"] {
+            width: auto;
+            margin: 0; /* Remove margin default */
+        }
+
+        /* Media queries para mobile */
+        @media (max-width: 768px) {
+             .header {
+                text-align: left; /* Alinha o título à esquerda no mobile */
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+             }
+
+            .admin-login-btn {
+                position: static; /* Remove posicionamento absoluto no mobile */
+                margin-bottom: 15px;
+                align-self: flex-end; /* Alinha o botão do admin à direita */
+            }
+
+            .system-title {
+                padding-top: 0;
+            }
+
+            .offers-section {
+                margin: 20px auto; /* Centraliza o carrossel no mobile */
+                max-width: 95%; /* Permite que o carrossel ocupe mais espaço no mobile */
+                min-height: 200px; /* Ajuste conforme a altura esperada do banner */
+            }
+
+             .offers-carousel {
+                 min-height: 180px; /* Ajuste conforme a altura esperada do banner */
+             }
+
+             .offers-container {
+                 min-height: 180px; /* Ajuste conforme a altura esperada do banner */
+             }
+
+            .offer-slide {
+                padding: 0; /* Remove padding lateral do slide */
+            }
+
+
+            .offer-banner, .promo-banner {
+                max-width: 90%; /* Limita largura do banner para espaçamento */
+                margin: 0 auto; /* Centraliza o banner */
+            }
+             /* Ajustes para backup/restore no mobile */
+             .backup-controls, .restore-controls {
+                align-items: stretch; /* Estica botões e inputs para largura total */
+             }
+
+             .backup-controls button, .restore-controls button, .restore-controls input[type="file"] {
+                 width: 100%; /* Largura total */
+             }
+
+             /* Ajustes para abas no mobile */
+             .login-area .tabs {
+                 flex-direction: column;
+                 align-items: stretch;
+             }
+             .login-area .tabs .tab-btn {
+                 width: 100%;
+                 margin-bottom: 5px;
+                 text-align: center;
+             }
+
+        }
+
+        /* Área de login */
+        .login-area {
+            max-width: 500px;
+            margin: 30px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: bold;
+            color: #666;
+        }
+
+        .tab-btn.active {
+            color: var(--secondary);
+            border-bottom-color: var(--secondary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+         /* Login type selector */
+        .login-type-selector {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+         .login-type-selector label {
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-weight: bold;
+             color: #555;
+        }
+
+         .login-type-selector input[type="radio"] {
+            width: auto;
+            margin-right: 5px;
+             cursor: pointer;
+        }
+
+
+        /* Modal de login admin */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .close-modal {
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* Painéis */
+        .panel {
+            display: none;
+        }
+
+        /* Estilos para lista de compras */
+        .shopping-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        /* Estilos para produtos */
+        .product-card {
+            position: relative;
+        }
+
+        .sale-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--danger);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        /* Estilos para resultados */
+        .best-market {
+            border: 3px solid var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        .stock-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        .stock-badge.in-stock {
+            background: var(--success);
+            color: white;
+        }
+
+        .stock-badge.low-stock {
+            background: #f39c12;
+            color: white;
+        }
+
+        .stock-badge.out-of-stock {
+            background: var(--danger);
+            color: white;
+        }
+
+        .stock-badge.not-found {
+            background: #95a5a6;
+            color: white;
+        }
+
+        /* Estilos para dropdown de produtos */
+        .product-suggestions {
+            position: absolute;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 0 0 8px 8px;
+            width: calc(100% - 24px);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .product-suggestion {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+
+        .product-suggestion:hover {
+            background: #f5f5f5;
+        }
+
+        .input-container {
+            position: relative;
+        }
+
+        .market-logo {
+            max-width: 100px;
+            max-height: 50px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+
+        /* Novos estilos para upload */
+        .upload-box {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 10px 0;
+        }
+
+        .upload-box:hover {
+            border-color: var(--secondary);
+            background: #f8f9fa;
+        }
+
+        .upload-box input[type="file"] {
+            display: none;
+        }
+
+        .upload-box label {
+            color: var(--secondary);
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .preview-image {
+            max-width: 100px;
+            max-height: 100px;
+            object-fit: contain;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+
+        .video-preview {
+            max-width: 200px;
+            max-height: 150px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+
+        .unit-selector {
+            display: flex;
+            margin: 10px 0;
+        }
+
+        .unit-selector label {
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .unit-selector input[type="radio"] {
+            width: auto;
+            margin-right: 5px;
+        }
+
+        /* Modal de edição */
+        .edit-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .edit-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .edit-modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .edit-modal-close {
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .edit-form-group {
+            margin-bottom: 15px;
+        }
+
+        .edit-form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .edit-form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(46, 204, 113, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="admin-login-btn" id="adminLoginBtn" title="Área do Administrador">
+                <i class="fas fa-user-shield"></i>
+            </button>
+            <h1 class="system-title"><i class="fas fa-shopping-cart"></i> Supermarket Finder</h1>
+        </div>
+
+        <div class="offers-section">
+            <div class="offers-header">
+                <h2 class="offers-title"><i class="fas fa-tag"></i> Ofertas da Semana</h2>
+            </div>
+
+            <div class="offers-carousel">
+                <div class="offers-container" id="offersContainer">
+                    </div>
+            </div>
+
+            <div class="carousel-controls" style="display: none;"></div>
+            <div class="carousel-indicators" style="display: none;"></div>
+
+        </div>
+
+        <div class="login-area" id="loginArea">
+            <h2>Acessar o Sistema</h2>
+
+            <div class="login-type-selector">
+                <label>
+                    <input type="radio" name="loginType" value="client" checked onchange="showLoginTab('clientLogin')"> Cliente
+                </label>
+                <label>
+                    <input type="radio" name="loginType" value="supermarket" onchange="showLoginTab('supermarketLogin')"> Supermercado
+                </label>
+            </div>
+
+
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="clientLogin" onclick="showLoginTab('clientLogin')">Login Cliente</button>
+                <button class="tab-btn" data-tab="clientRegister" onclick="showLoginTab('clientRegister')">Cadastro Cliente</button>
+                 <button class="tab-btn" data-tab="supermarketRegister" onclick="showLoginTab('supermarketRegister')">Cadastro Parceiro</button>
+            </div>
+
+             <div id="clientLoginTab" class="tab-content active">
+                <h3>Login Cliente</h3>
+                <input type="email" id="clientEmail" placeholder="Email">
+                <input type="password" id="clientPassword" placeholder="Senha">
+                <button onclick="clientLogin()">Entrar</button>
+            </div>
+
+            <div id="clientRegisterTab" class="tab-content">
+                 <h3>Cadastro Cliente</h3>
+                <input type="text" id="clientName" placeholder="Nome Completo">
+                <input type="tel" id="clientPhone" placeholder="Telefone">
+                <input type="email" id="newClientEmail" placeholder="Email">
+                <input type="password" id="newClientPassword" placeholder="Senha">
+                <input type="text" id="clientCep" placeholder="CEP para geolocalização">
+                <button onclick="clientRegister()">Criar Conta Cliente</button>
+            </div>
+
+             <div id="supermarketRegisterTab" class="tab-content">
+                 <h3>Cadastro de Supermercado Parceiro</h3>
+                 <input type="text" id="newMarketName" placeholder="Nome do Supermercado">
+                 <input type="text" id="newMarketCep" placeholder="CEP do Supermercado">
+                 <input type="text" id="newMarketAddress" placeholder="Endereço do Supermercado">
+                 <input type="text" id="newMarketPhone" placeholder="Telefone do Supermercado">
+                 <input type="email" id="supermarketUserEmail" placeholder="Email para Login (Ex: contato@supermercado.com)">
+                 <input type="password" id="supermarketUserPassword" placeholder="Senha para Login">
+
+                  <div class="upload-box" onclick="document.getElementById('newMarketLogoInput').click()">
+                     <p><i class="fas fa-image"></i> Clique para adicionar logo do supermercado</p>
+                     <input type="file" id="newMarketLogoInput" accept="image/*" onchange="previewNewMarketLogo(event)">
+                     <img id="newMarketLogoPreview" class="preview-image" style="display: none;">
+                 </div>
+
+                 <button onclick="registerSupermarket()"><i class="fas fa-store"></i> Cadastrar Supermercado</button>
+             </div>
+
+             <div id="supermarketLoginTab" class="tab-content">
+                <h3>Login Supermercado Parceiro</h3>
+                <input type="email" id="supermarketEmail" placeholder="Email de Login">
+                <input type="password" id="supermarketPassword" placeholder="Senha">
+                <button onclick="supermarketLogin()">Entrar como Supermercado</button>
+             </div>
+        </div>
+    </div>
+
+    <div id="adminModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2><i class="fas fa-user-shield"></i> Login Administrativo</h2>
+            <input type="text" id="adminUser" placeholder="Usuário">
+            <input type="password" id="adminPass" placeholder="Senha">
+            <button onclick="adminLogin()">Entrar</button>
+        </div>
+    </div>
+
+    <div id="clientPanel" class="container panel">
+        <div class="header">
+            <h1><i class="fas fa-user"></i> Painel do Cliente</h1>
+            <button onclick="logout()" style="width: auto; padding: 8px 15px;">Sair</button>
+        </div>
+
+        <div class="card">
+            <h2><i class="fas fa-list"></i> Minha Lista de Compras</h2>
+            <div id="shoppingList" class="grid"></div>
+            <div class="input-container">
+                <input type="text" id="newItem" placeholder="Adicionar item" oninput="searchProducts(this.value)">
+                <div id="productSuggestions" class="product-suggestions" style="display: none;"></div>
+            </div>
+            <button onclick="addItem()">Adicionar</button>
+        </div>
+
+        <div class="card">
+            <h2><i class="fas fa-search"></i> Encontrar Melhores Ofertas</h2>
+            <button onclick="calculateBest()">Calcular Melhores Ofertas</button>
+            <div id="results" class="grid" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+
+    <div id="supermarketPanel" class="container panel">
+         <div class="header">
+            <h1><i class="fas fa-store"></i> Painel do Supermercado</h1>
+             <button onclick="logout()" style="width: auto; padding: 8px 15px;">Sair</button>
+             <div class="tabs">
+                 <button class="tab-btn active" data-tab="myDetails" onclick="showSupermarketTab('myDetails')">Meus Detalhes</button>
+                 <button class="tab-btn" data-tab="myProducts" onclick="showSupermarketTab('myProducts')">Meus Produtos</button>
+             </div>
+         </div>
+
+         <div id="supermarketMyDetails" class="card tab-content active">
+             <h2><i class="fas fa-info-circle"></i> Detalhes do Meu Supermercado</h2>
+             <div id="myMarketDetailsContent">
+                 </div>
+         </div>
+
+         <div id="supermarketMyProducts" class="card tab-content" style="display: none;">
+              <h2><i class="fas fa-box-open"></i> Gerenciar Meus Produtos</h2>
+
+              <div class="card">
+                 <h3>Adicionar Novo Produto</h3>
+                 <input type="text" id="supermarketProductName" placeholder="Nome do Produto">
+                 <div class="unit-selector">
+                     <label><input type="radio" name="supermarketUnit" value="g" checked> Gramas (g)</label>
+                     <label><input type="radio" name="supermarketUnit" value="ml"> Mililitros (ml)</label>
+                     <label><input type="radio" name="supermarketUnit" value="un"> Unidade</label>
+                 </div>
+                 <input type="number" id="supermarketProductQuantity" placeholder="Quantidade (ex: 500 para 500g ou 500ml)">
+                 <input type="number" id="supermarketProductPrice" placeholder="Preço" step="0.01">
+                 <input type="number" id="supermarketProductStock" placeholder="Estoque">
+                 <div style="display: flex; align-items: center; margin: 10px 0;">
+                     <input type="checkbox" id="supermarketProductOnSale" style="width: auto; margin-right: 10px;">
+                     <label for="supermarketProductOnSale">Produto em Oferta</label>
+                 </div>
+                  <div class="upload-box" onclick="document.getElementById('supermarketProductImageInput').click()">
+                     <p><i class="fas fa-image"></i> Clique para adicionar foto do produto</p>
+                     <input type="file" id="supermarketProductImageInput" accept="image/*" onchange="previewSupermarketProductImage(event)">
+                     <img id="supermarketProductImagePreview" class="preview-image" style="display: none;">
+                 </div>
+                  <div class="upload-box" onclick="document.getElementById('supermarketProductVideoInput').click()">
+                     <p><i class="fas fa-video"></i> Clique para adicionar vídeo do produto (opcional)</p>
+                     <input type="file" id="supermarketProductVideoInput" accept="video/*" onchange="previewSupermarketProductVideo(event)">
+                     <video id="supermarketProductVideoPreview" class="video-preview" controls style="display: none;"></video>
+                 </div>
+                 <button onclick="saveSupermarketProduct()"><i class="fas fa-plus-circle"></i> Adicionar Produto</button>
+             </div>
+
+              <div class="card" style="margin-top: 20px;">
+                 <h3><i class="fas fa-file-import"></i> Importar Lista de Produtos (CSV)</h3>
+                 <p>Formato CSV esperado: nome;preço;estoque;unidade;quantidade;oferta (separados por ponto-e-vírgula)</p>
+                 <div class="upload-box" id="supermarketProductListUploadBox" ondragover="event.preventDefault()" ondrop="handleSupermarketProductListDrop(event)">
+                    <p><i class="fas fa-cloud-upload-alt" style="font-size: 24px;"></i><br>
+                    Arraste arquivo CSV aqui ou clique para selecionar</p>
+                    <input type="file" id="supermarketProductListInput" accept=".csv" style="display: none;">
+                 </div>
+                 <div id="supermarketProductImportProgress"></div>
+             </div>
+
+              <h3 style="margin-top: 20px;">Meus Produtos Cadastrados</h3>
+             <div id="supermarketProductList" class="grid">
+                 </div>
+         </div>
+    </div>
+
+
+    <div id="adminPanel" class="container panel">
+        <div class="header">
+            <h1><i class="fas fa-tools"></i> Painel Administrativo (Geral)</h1>
+            <button onclick="logout()" style="width: auto; padding: 8px 15px;">Sair</button>
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="markets" onclick="showAdminTab('markets')">Supermercados</button>
+                <button class="tab-btn" data-tab="products" onclick="showAdminTab('products')">Produtos</button>
+                <button class="tab-btn" data-tab="marketing" onclick="showAdminTab('marketing')">Marketing</button>
+                <button class="tab-btn" data-tab="backup" onclick="showAdminTab('backup')">Backup</button>
+                 <button class="tab-btn" data-tab="supermarketUsers" onclick="showAdminTab('supermarketUsers')">Parceiros</button> </div>
+        </div>
+
+        <div id="adminMarkets" class="card tab-content active">
+            <h2><i class="fas fa-store"></i> Gerenciar Supermercados</h2>
+            <h3>Supermercados Cadastrados</h3>
+            <div id="marketList" class="grid"></div>
+        </div>
+
+        <div id="adminProducts" class="card tab-content" style="display: none;">
+            <h2><i class="fas fa-box-open"></i> Gerenciar Produtos</h2>
+             <h3>Todos os Produtos Cadastrados</h3>
+            <div id="productList" class="grid"></div>
+        </div>
+
+        <div id="adminMarketing" class="card tab-content" style="display: none;">
+            <h2><i class="fas fa-bullhorn"></i> Banners Promocionais</h2>
+
+            <div class="promo-form">
+                <input type="text" id="promoTitle" placeholder="Título do Banner">
+                <textarea id="promoText" placeholder="Texto promocional" rows="3"></textarea>
+                <input type="url" id="promoLink" placeholder="Link externo (opcional)" pattern="https?://.+">
+                <small style="color: #666;">Exemplo: https://www.exemplo.com/promocao</small>
+
+                <div class="upload-box" onclick="document.getElementById('promoImageInput').click()">
+                    <p><i class="fas fa-image"></i> Clique para adicionar imagem do banner</p>
+                    <input type="file" id="promoImageInput" accept="image/*" onchange="previewPromoImage(event)">
+                    <img id="promoImagePreview" class="preview-image" style="display: none;">
+                </div>
+
+                <button onclick="savePromoBanner()">Salvar Banner</button>
+            </div>
+
+            <h3>Banners Ativos</h3>
+            <div id="promoList" class="promo-list"></div>
+        </div>
+
+        <div id="adminBackup" class="card tab-content" style="display: none;">
+            <h2><i class="fas fa-database"></i> Backup e Restauração</h2>
+
+            <div class="backup-section">
+                <div class="backup-controls">
+                    <h3>Fazer Backup</h3>
+                    <p>Exporte todos os dados do sistema (supermercados, produtos, usuários e banners) para um arquivo JSON.</p>
+                    <button onclick="createBackup()"><i class="fas fa-download"></i> Baixar Backup</button>
+                </div>
+
+                <hr style="width: 100%; border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+                <div class="restore-controls">
+                    <h3>Importar Backup</h3>
+                    <p>Selecione um arquivo de backup JSON para restaurar os dados do sistema. Isso substituirá todos os dados atuais!</p>
+                     <input type="file" id="backupFileInput" accept=".json">
+                    <button onclick="restoreBackup()"><i class="fas fa-upload"></i> Carregar Backup</button>
+                </div>
+            </div>
+        </div>
+
+         <div id="adminSupermarketUsers" class="card tab-content" style="display: none;">
+             <h2><i class="fas fa-users"></i> Gerenciar Usuários Parceiros</h2>
+             <h3>Usuários Supermercado Cadastrados</h3>
+             <div id="supermarketUserList" class="grid">
+                 </div>
+         </div>
+
+
+        <div id="adminMarketDetail" class="card" style="display: none;">
+            <div class="header">
+                <h2><i class="fas fa-store"></i> <span id="marketDetailName"></span></h2>
+                <button onclick="backToMarkets()" style="width: auto; padding: 8px 15px;">Voltar</button>
+            </div>
+
+            <div class="card">
+                <h3><i class="fas fa-file-import"></i> Importar Lista de Produtos (Individual)</h3>
+                <p>Formato CSV: nome;preço;estoque;unidade;quantidade;oferta (separados por ponto-e-vírgula)</p>
+                <div class="upload-box" id="marketUploadBox" ondragover="event.preventDefault()" ondrop="handleMarketDrop(event)">
+                    <p><i class="fas fa-cloud-upload-alt" style="font-size: 24px;"></i><br>
+                    Arraste arquivo CSV aqui ou clique para selecionar</p>
+                    <input type="file" id="marketCsvInput" accept=".csv" style="display: none;">
+                </div>
+                <div id="marketImportProgress"></div>
+            </div>
+
+            <div class="card">
+                <h3><i class="fas fa-boxes"></i> Produtos deste Supermercado</h3>
+                <div id="marketProductList" class="grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="editProductModal" class="edit-modal">
+        <div class="edit-modal-content">
+            <div class="edit-modal-header">
+                <h3 class="edit-modal-title">Editar Produto</h3>
+                <span class="edit-modal-close" onclick="closeEditModal()">&times;</span>
+            </div>
+
+            <div class="edit-form-group">
+                <label class="edit-form-label">Nome do Produto</label>
+                <input type="text" id="editProductName" class="edit-form-input">
+            </div>
+
+            <div class="edit-form-group" id="editProductMarketGroup">
+                <label class="edit-form-label">Supermercado</label>
+                <select id="editProductMarket" class="edit-form-input"></select>
+            </div>
+
+            <div class="edit-form-group">
+                <label class="edit-form-label">Unidade</label>
+                <div class="unit-selector">
+                    <label><input type="radio" name="editUnit" value="g"> Gramas (g)</label>
+                    <label><input type="radio" name="editUnit" value="ml"> Mililitros (ml)</label>
+                    <label><input type="radio" name="editUnit" value="un"> Unidade</label>
+                </div>
+            </div>
+
+            <div class="edit-form-group">
+                <label class="edit-form-label">Quantidade</label>
+                <input type="number" id="editProductQuantity" class="edit-form-input">
+            </div>
+
+            <div class="edit-form-group">
+                <label class="edit-form-label">Preço</label>
+                <input type="number" id="editProductPrice" class="edit-form-input" step="0.01">
+            </div>
+
+            <div class="edit-form-group">
+                <label class="edit-form-label">Estoque</label>
+                <input type="number" id="editProductStock" class="edit-form-input">
+            </div>
+
+            <div class="edit-form-group">
+                <label class="edit-form-label">
+                    <input type="checkbox" id="editProductOnSale"> Produto em Oferta
+                </label>
+            </div>
+
+            <div class="edit-form-group">
+                <label class="edit-form-label">Imagem do Produto</label>
+                <div class="upload-box" onclick="document.getElementById('editProductImageInput').click()">
+                    <p><i class="fas fa-image"></i> Clique para alterar a foto do produto</p>
+                    <input type="file" id="editProductImageInput" accept="image/*" onchange="previewEditProductImage(event)">
+                    <img id="editProductImagePreview" class="preview-image" style="display: none;">
+                </div>
+            </div>
+
+            <div class="edit-form-group">
+                <label class="edit-form-label">Vídeo do Produto (opcional)</label>
+                <div class="upload-box" onclick="document.getElementById('editProductVideoInput').click()">
+                    <p><i class="fas fa-video"></i> Clique para alterar o vídeo do produto</p>
+                    <input type="file" id="editProductVideoInput" accept="video/*" onchange="previewEditProductVideo(event)">
+                    <video id="editProductVideoPreview" class="video-preview" controls style="display: none;"></video>
+                </div>
+            </div>
+
+            <div class="edit-form-actions">
+                <button onclick="closeEditModal()">Cancelar</button>
+                <button onclick="updateProduct()">Salvar Alterações</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="editBannerModal" class="edit-modal">
+        <div class="edit-modal-content">
+            <div class="edit-modal-header">
+                <h3 class="edit-modal-title">Editar Banner Promocional</h3>
+                <span class="edit-modal-close" onclick="closeEditBannerModal()">&times;</span>
+            </div>
+
+            <div class="edit-form-group">
+                <label class="edit-form-label">Título</label>
+                <input type="text" id="editBannerTitle" class="edit-form-input">
+            </div>
+
+            <div class="edit-form-group">
+                <label class="edit-form-label">Texto Promocional</label>
+                <textarea id="editBannerText" class="edit-form-input" rows="3"></textarea>
+            </div>
+
+            <div class="edit-form-group">
+                <label class="edit-form-label">Link Externo</label>
+                <input type="url" id="editBannerLink" class="edit-form-input" placeholder="https://exemplo.com/promocao">
+            </div>
+
+            <div class="edit-form-group">
+                <label class="edit-form-label">Imagem do Banner</label>
+                <div class="upload-box" onclick="document.getElementById('editBannerImageInput').click()">
+                    <p><i class="fas fa-image"></i> Clique para alterar a imagem</p>
+                    <input type="file" id="editBannerImageInput" accept="image/*" onchange="previewEditBannerImage(event)">
+                    <img id="editBannerImagePreview" class="preview-image" style="display: none;">
+                </div>
+            </div>
+
+            <div class="edit-form-actions">
+                <button onclick="closeEditBannerModal()">Cancelar</button>
+                <button onclick="updateBanner()">Salvar Alterações</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+// Configurações Iniciais
+const ADMIN_CREDENTIALS = { user: "admin", pass: "admin123" };
+const UNSPLASH_KEY = "E5SNfKZhwtWXm0MJO0dHu0SVPguIBe0NSsAzPpi2Y08"; // Replace with your actual Unsplash API key if needed.
+
+// Variáveis para controle da exibição das ofertas (FADE)
+let currentOfferIndex = 0;
+let offerInterval;
+const OFFER_CHANGE_INTERVAL = 5000; // 5 segundos
+
+// Variáveis para upload de imagens/vídeos
+let marketLogoBase64 = ''; // For admin market form
+let newMarketLogoBase64 = ''; // For new market registration form
+let productImageBase64 = ''; // For admin product form
+let supermarketProductImageBase64 = ''; // For supermarket product form
+let productVideoBase64 = ''; // For admin product form
+let supermarketProductVideoBase64 = ''; // For supermarket product form
+let promoImageBase64 = '';
+
+// Variáveis para edição
+let currentEditProductId = null;
+let currentEditBannerId = null;
+let editProductImageBase64 = '';
+let editProductVideoBase64 = '';
+let editBannerImageBase64 = '';
+
+// Sistema de Autenticação e Controle de Usuário/Painel
+let currentUser = null; // Cliente logado
+let isAdmin = false; // Admin geral logado
+let loggedInSupermarket = null; // Supermercado logado (objeto do array 'supermarkets')
+
+
+// =============================================
+// FUNÇÕES DE INICIALIZAÇÃO E CONTROLE
+// =============================================
+
+/**
+ * Inicializa o sistema quando o DOM estiver pronto
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    initializeSystem();
+    setupEventListeners();
+
+    // Atualiza as ofertas a cada minuto (mantido caso novas ofertas sejam adicionadas via admin)
+    setInterval(loadSpecialOffers, 60000);
+
+    // Recarrega as ofertas quando a tela muda de tamanho (pode influenciar o layout, embora o fade seja principal)
+    window.addEventListener('resize', () => {
+        loadSpecialOffers();
+    });
+});
+
+/**
+ * Inicializa os dados do sistema
+ */
+function initializeSystem() {
+    // Verifica e inicializa dados essenciais
+    if(!localStorage.markets) {
+        localStorage.markets = JSON.stringify([
+            {
+                id: 1,
+                name: "Supermercado Central",
+                cep: "01001000",
+                address: "Rua Principal, 123 - Centro",
+                phone: "(11) 1234-5678",
+                logo: "https://via.placeholder.com/150?text=Supermercado+Central"
+            },
+            {
+                id: 2,
+                name: "Mercado do Bairro",
+                cep: "02002000",
+                address: "Av. Secundária, 456 - Vila Nova",
+                phone: "(11) 9876-5432",
+                logo: "https://via.placeholder.com/150?text=Mercado+Bairro"
+            }
+        ]);
+    }
+
+    if(!localStorage.products) {
+        localStorage.products = JSON.stringify([
+            {
+                id: 1,
+                marketId: 1,
+                name: "Arroz",
+                quantity: 5,
+                unit: "kg",
+                price: 22.50,
+                stock: 20,
+                onSale: false,
+                image: '',
+                video: ''
+            },
+            {
+                id: 2,
+                marketId: 1,
+                name: "Feijão Carioca",
+                quantity: 1,
+                unit: "kg",
+                price: 8.75,
+                stock: 15,
+                onSale: true,
+                image: '',
+                video: ''
+            },
+             {
+                id: 3,
+                marketId: 2,
+                name: "Macarrão",
+                quantity: 500,
+                unit: "g",
+                price: 4.50,
+                stock: 50,
+                onSale: false,
+                image: '',
+                video: ''
+            }
+        ]);
+    }
+
+    if(!localStorage.promoBanners) {
+        localStorage.promoBanners = JSON.stringify([
+            {
+                id: 1,
+                title: "Promoção Relâmpago",
+                text: "Descontos especiais por tempo limitado!",
+                link: "https://exemplo.com/promocao",
+                image: ""
+            }
+        ]);
+    }
+
+    if(!localStorage.users) {
+        localStorage.users = JSON.stringify([{ // Client users
+            name: "Cliente Exemplo",
+            email: "cliente@exemplo.com",
+            password: "123456",
+            phone: "(11) 99999-9999",
+            cep: "00000000",
+            list: ["leite", "pão", "arroz"]
+        }]);
+    }
+
+    if(!localStorage.supermarkets) {
+        localStorage.supermarkets = JSON.stringify([ // Supermarket users
+            {
+                id: 1,
+                marketId: 1, // Link to a market
+                email: "supermercado1@exemplo.com",
+                password: "password123"
+            },
+             {
+                id: 2,
+                marketId: 2, // Link to another market
+                email: "supermercado2@exemplo.com",
+                password: "password456"
+            }
+        ]);
+    }
+
+
+    // Carrega os dados iniciais
+    loadSpecialOffers();
+    // Initially show client login tab
+    showLoginTab('clientLogin');
+}
+
+/**
+ * Configura os event listeners do sistema
+ */
+function setupEventListeners() {
+    // Controle de abas da área de login/cadastro
+    document.querySelectorAll('.login-area .tabs .tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Only show the login/register tabs if the login type is client
+            // This logic is now handled by showLoginTab based on radio button
+            // So this click listener only needs to call showLoginTab
+             showLoginTab(btn.dataset.tab);
+        });
+    });
+
+     // Event listener for login type radio buttons
+     document.querySelectorAll('input[name="loginType"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'client') {
+                 // Show client tabs and activate client login tab
+                 showLoginTab('clientLogin');
+            } else if (this.value === 'supermarket') {
+                  // Show supermarket login tab
+                 showLoginTab('supermarketLogin');
+            }
+        });
+     });
+
+
+    // Controle do modal admin
+    document.getElementById('adminLoginBtn').addEventListener('click', () => {
+        document.getElementById('adminModal').style.display = 'flex';
+    });
+    document.querySelector('.close-modal').addEventListener('click', () => {
+        document.getElementById('adminModal').style.display = 'none';
+    });
+    window.addEventListener('click', (e) => {
+        if(e.target === document.getElementById('adminModal')) {
+            document.getElementById('adminModal').style.display = 'none';
+        }
+        if(e.target === document.getElementById('editProductModal')) {
+            closeEditModal();
+        }
+        if(e.target === document.getElementById('editBannerModal')) {
+            closeEditBannerModal();
+        }
+    });
+
+    // Event listener para o input de arquivo de backup
+     document.getElementById('backupFileInput').addEventListener('change', function(event) {
+        // Trigger the restore function when a file is selected
+        restoreBackup();
+     });
+
+     // Market-specific import file input and drop zone listeners (within Market Detail view - Admin General Only)
+     // Keep these as Admin General might still want to import list for a specific market.
+     const marketUploadBox = document.getElementById('marketUploadBox');
+     if (marketUploadBox) {
+        marketUploadBox.addEventListener('click', () => {
+            document.getElementById('marketCsvInput').click();
+        });
+     }
+     const marketCsvInput = document.getElementById('marketCsvInput');
+     if (marketCsvInput) {
+        marketCsvInput.addEventListener('change', (e) => {
+            if(e.target.files.length) handleMarketFile(e.target.files[0]);
+        });
+     }
+
+    // Supermarket Product List Upload Input and Drop Zone Listeners (within Supermarket Panel)
+    const supermarketProductListUploadBox = document.getElementById('supermarketProductListUploadBox');
+    if (supermarketProductListUploadBox) {
+         supermarketProductListUploadBox.addEventListener('click', () => {
+            document.getElementById('supermarketProductListInput').click();
+         });
+          supermarketProductListUploadBox.addEventListener('dragover', (e) => e.preventDefault()); // Allow drop
+          supermarketProductListUploadBox.addEventListener('drop', (e) => handleSupermarketProductListDrop(e));
+    }
+     const supermarketProductListInput = document.getElementById('supermarketProductListInput');
+     if (supermarketProductListInput) {
+         supermarketProductListInput.addEventListener('change', (e) => {
+             if(e.target.files.length) handleSupermarketProductListUpload(e.target.files[0]);
+         });
+     }
+
+
+    // New Market Logo Input listener (for supermarket registration)
+     document.getElementById('newMarketLogoInput').addEventListener('change', (e) => {
+        if(e.target.files.length) previewNewMarketLogo(e);
+     });
+
+      // Supermarket Product Image/Video Input listeners (for individual product add/edit)
+     document.getElementById('supermarketProductImageInput').addEventListener('change', (e) => {
+         if(e.target.files.length) previewSupermarketProductImage(e);
+     });
+     document.getElementById('supermarketProductVideoInput').addEventListener('change', (e) => {
+         if(e.target.files.length) previewSupermarketProductVideo(e);
+     });
+
+     // Edit Modal Image/Video Input listeners (used by both Admin and Supermarket when editing)
+      document.getElementById('editProductImageInput').addEventListener('change', (e) => {
+          if(e.target.files.length) previewEditProductImage(e);
+      });
+      document.getElementById('editProductVideoInput').addEventListener('change', (e) => {
+          if(e.target.files.length) previewEditProductVideo(e);
+      });
+      document.getElementById('editBannerImageInput').addEventListener('change', (e) => {
+          if(e.target.files.length) previewEditBannerImage(e);
+      });
+
+
+     // Ensure correct tabs are shown initially based on default radio selection
+     const initialLoginType = document.querySelector('input[name="loginType"]:checked').value;
+     if (initialLoginType === 'client') {
+         showLoginTab('clientLogin');
+     } else {
+         showLoginTab('supermarketLogin');
+     }
+
+     // Handle initial panel display based on refresh (check sessionStorage or cookie if needed for persistence across sessions)
+     // For this example, we'll reset to login screen on page load for simplicity.
+}
+
+/**
+ * Shows the specified tab in the login area.
+ * @param {string} tabId - The ID of the tab content div to show (e.g., 'clientLogin', 'clientRegister', 'supermarketRegister', 'supermarketLogin').
+ */
+function showLoginTab(tabId) {
+     // Ensure only the relevant tabs are visible based on login type BEFORE setting active
+     const loginType = document.querySelector('input[name="loginType"]:checked').value;
+
+     document.querySelectorAll('.login-area .tabs .tab-btn').forEach(btn => {
+         let showBtn = false;
+         if (loginType === 'client') {
+             if (btn.dataset.tab.startsWith('client') || btn.dataset.tab === 'supermarketRegister') {
+                 showBtn = true;
+             }
+         } else if (loginType === 'supermarket') {
+             if (btn.dataset.tab === 'supermarketRegister' || btn.dataset.tab === 'supermarketLogin') {
+                  showBtn = true;
+             }
+         }
+          btn.style.display = showBtn ? 'block' : 'none';
+     });
+
+
+    document.querySelectorAll('.login-area .tabs .tab-btn').forEach(btn => {
+         if (btn.dataset.tab === tabId) {
+             btn.classList.add('active');
+         } else {
+             btn.classList.remove('active');
+         }
+    });
+    document.querySelectorAll('.login-area .tab-content').forEach(c => {
+        if (c.id === tabId + 'Tab') {
+            c.classList.add('active');
+        } else {
+            c.classList.remove('active');
+        }
+    });
+}
+
+
+// =============================================
+// FUNÇÕES DO SISTEMA DE OFERTAS (FADE)
+// =============================================
+
+/**
+ * Carrega as ofertas especiais e banners no carrossel de fade
+ */
+function loadSpecialOffers() {
+    const markets = JSON.parse(localStorage.markets || '[]');
+    const products = JSON.parse(localStorage.products || '[]');
+    const promoBanners = JSON.parse(localStorage.promoBanners || '[]');
+
+    // Filtra apenas produtos marcados como oferta e com estoque
+    const specialOffers = products.filter(p => p.onSale && p.stock > 0);
+    const offersContainer = document.getElementById('offersContainer');
+
+    // Combina produtos e banners em um único array
+    const allItems = [...specialOffers, ...promoBanners];
+
+    // Limpa o container existente
+    offersContainer.innerHTML = '';
+    clearInterval(offerInterval); // Limpa qualquer timer existente
+
+    if(allItems.length === 0) {
+        offersContainer.innerHTML = '<div class="offer-slide active"><div class="offer-banner"><p>Nenhuma oferta disponível no momento</p></div></div>';
+        return;
+    }
+
+    // Adiciona cada item como um offer-slide individual
+    allItems.forEach((item, index) => {
+        let itemHtml = '';
+        if(item && typeof item.price === 'number') { // É um produto (check price type as simple validation)
+            const market = markets.find(m => m.id === item.marketId);
+            // Calculate a simple discount percentage for display
+            const originalPrice = item.price * 1.2; // Assume original price is 20% higher
+            const discount = Math.round((1 - item.price / originalPrice) * 100);
+
+            itemHtml = `
+                <div class="offer-banner">
+                    ${item.onSale ? `<span class="offer-badge">-${discount}%</span>` : ''}
+                    ${item.image ? `<img src="${item.image}" alt="${item.name}">` :
+                       `<div style="height: 80px; display: flex; align-items: center; justify-content: center; color: #999;">
+                            <i class="fas fa-image" style="font-size: 40px;"></i>
+                        </div>`}
+                    <h3 class="offer-name">${item.name} ${item.quantity ? `(${item.quantity}${item.unit})` : ''}</h3>
+                    <div class="offer-price">
+                        ${item.onSale ? `<span class="original">R$ ${originalPrice.toFixed(2)}</span>` : ''}
+                        <span class="current">R$ ${item.price.toFixed(2)}</span>
+                    </div>
+                    <p class="offer-market">No ${market?.name || 'Supermercado'}</p>
+                    <button onclick="addOfferToCart('${item.name.replace(/'/g, "\\'")}')" style="margin-top: 10px; width: 100%;">
+                        <i class="fas fa-cart-plus"></i> Adicionar à lista
+                    </button>
+                </div>
+            `;
+        } else if (item && typeof item.title === 'string') { // É um banner promocional (check title type)
+            const bannerClick = item.link ? `onclick="window.open('${item.link}', '_blank')"` : '';
+            itemHtml = `
+                <div class="promo-banner" ${bannerClick}>
+                    ${item.image ? `<img src="${item.image}" alt="${item.title}">` : ''}
+                    <h3 class="promo-title">${item.title}</h3>
+                    <p class="promo-text">${item.text}</p>
+                    ${item.link ? '<small style="display: block; margin-top: 10px;"><i class="fas fa-external-link-alt"></i> Clique para acessar</small>' : ''}
+                </div>
+            `;
+        } else {
+             console.warn("Skipping invalid item in offers:", item);
+             return; // Skip invalid items
+        }
+
+        const slideDiv = document.createElement('div');
+        slideDiv.className = 'offer-slide';
+        slideDiv.innerHTML = itemHtml;
+        offersContainer.appendChild(slideDiv);
+    });
+
+    // Inicializa o primeiro banner como ativo
+    const slides = offersContainer.querySelectorAll('.offer-slide');
+    if (slides.length > 0) {
+        slides[0].classList.add('active');
+        currentOfferIndex = 0;
+
+        // Inicia o timer para alternar as ofertas se houver mais de uma
+        if (slides.length > 1) {
+            startOfferAlternation();
+        }
+    }
+}
+
+/**
+ * Inicia a alternância automática das ofertas (fade)
+ */
+function startOfferAlternation() {
+    clearInterval(offerInterval); // Garante que não há timers duplicados
+    offerInterval = setInterval(cycleOffers, OFFER_CHANGE_INTERVAL);
+}
+
+/**
+ * Alterna para a próxima oferta com efeito de fade
+ */
+function cycleOffers() {
+    const slides = document.querySelectorAll('.offer-slide');
+    if (slides.length < 2) {
+        clearInterval(offerInterval); // Para o timer se não houver pelo menos duas ofertas
+        return;
+    }
+
+    const currentSlide = slides[currentOfferIndex];
+    currentSlide.classList.remove('active');
+
+    currentOfferIndex = (currentOfferIndex + 1) % slides.length;
+
+    const nextSlide = slides[currentOfferIndex];
+    nextSlide.classList.add('active');
+}
+
+
+/**
+ * Adiciona uma oferta ao carrinho
+ */
+function addOfferToCart(productName) {
+    if(!currentUser) {
+        alert('Faça login como cliente para adicionar itens à sua lista!');
+        return;
+    }
+
+    const users = JSON.parse(localStorage.users);
+    const userIndex = users.findIndex(u => u.email === currentUser.email);
+    if (userIndex > -1) {
+        users[userIndex].list.push(productName);
+        localStorage.users = JSON.stringify(users);
+        currentUser = users[userIndex];
+        if(document.getElementById('clientPanel').style.display === 'block') {
+            loadClientInterface();
+        }
+
+        alert(`"${productName}" foi adicionado à sua lista de compras!`);
+    } else {
+         alert('Erro ao encontrar usuário. Por favor, faça login novamente.');
+         logout();
+    }
+
+}
+
+// =============================================
+// SISTEMA CLIENTE
+// =============================================
+
+function validateCEP(cep) {
+    // Remove caracteres não numéricos
+    const cleanedCEP = cep.replace(/\D/g, '');
+    // Verifica se tem 8 dígitos
+    if(cleanedCEP.length !== 8) {
+        return false;
+    }
+
+    return true;
+}
+
+function clientRegister() {
+    const name = document.getElementById('clientName').value.trim();
+    const phone = document.getElementById('clientPhone').value.trim();
+    const email = document.getElementById('newClientEmail').value.trim();
+    const password = document.getElementById('newClientPassword').value.trim();
+    const cep = document.getElementById('clientCep').value.trim();
+
+    if(!name || !phone || !email || !password || !cep) {
+        alert('Preencha todos os campos!');
+        return;
+    }
+
+    if(!validateCEP(cep)) {
+        alert('CEP inválido! Digite um CEP com 8 dígitos.');
+        return;
+    }
+
+    const users = JSON.parse(localStorage.users || '[]');
+    if(users.some(u => u.email === email)) {
+        alert('Email já cadastrado!');
+        return;
+    }
+
+    users.push({
+        name,
+        phone,
+        email,
+        password,
+        cep,
+        list: []
+    });
+    localStorage.users = JSON.stringify(users);
+    alert('Registro de cliente realizado com sucesso! Faça login para acessar.');
+
+    // Limpa os campos do formulário de registro
+    document.getElementById('clientName').value = '';
+    document.getElementById('clientPhone').value = '';
+    document.getElementById('newClientEmail').value = '';
+    document.getElementById('newClientPassword').value = '';
+    document.getElementById('clientCep').value = '';
+
+    // Muda para a aba de login do cliente
+    document.querySelector('input[name="loginType"][value="client"]').checked = true;
+    showLoginTab('clientLogin');
+}
+
+function clientLogin() {
+    const email = document.getElementById('clientEmail').value.trim();
+    const password = document.getElementById('clientPassword').value.trim();
+    const users = JSON.parse(localStorage.users || '[]');
+    const user = users.find(u => u.email === email && u.password === password);
+
+    if(user) {
+        currentUser = user;
+        isAdmin = false; // Ensure admin status is false
+        loggedInSupermarket = null; // Ensure supermarket status is null
+        document.getElementById('loginArea').style.display = 'none';
+        document.getElementById('clientPanel').style.display = 'block';
+        document.getElementById('adminPanel').style.display = 'none';
+        document.getElementById('supermarketPanel').style.display = 'none';
+        loadClientInterface();
+         // Limpa os campos do formulário de login após o sucesso
+        document.getElementById('clientEmail').value = '';
+        document.getElementById('clientPassword').value = '';
+    } else {
+        alert('Email ou senha incorretos para login de cliente!');
+    }
+}
+
+function loadClientInterface() {
+    if(!currentUser) return;
+
+    // Carrega lista de compras
+    const listContainer = document.getElementById('shoppingList');
+    listContainer.innerHTML = currentUser.list.map(item => `
+        <div class="card shopping-list-item">
+            <span>${item}</span>
+            <button onclick="removeItem('${item.replace(/'/g, "\\'")}')" style="width: auto; padding: 5px 10px;">Remover</button>
+        </div>
+    `).join('');
+}
+
+function searchProducts(query) {
+    const suggestionsContainer = document.getElementById('productSuggestions');
+    if(!query || query.length < 2) {
+        suggestionsContainer.style.display = 'none';
+        suggestionsContainer.innerHTML = ''; // Clear suggestions
+        return;
+    }
+
+    const products = JSON.parse(localStorage.products || '[]');
+    // Divide a query em palavras para busca mais precisa
+    const queryWords = query.toLowerCase().split(' ').filter(word => word.length > 0); // Filter out empty strings from split
+
+    const filtered = products.filter(p => {
+        const productName = p.name.toLowerCase();
+        // Verifica se todas as palavras da query estão no nome do produto
+        return queryWords.every(word => productName.includes(word));
+    }).slice(0, 5); // Limita a 5 sugestões
+
+
+    suggestionsContainer.innerHTML = filtered.map(p => `
+        <div class="product-suggestion" onclick="selectProduct('${p.name.replace(/'/g, "\\'")}')">
+            ${p.name} ${p.quantity ? `(${p.quantity}${p.unit})` : ''}
+            <small style="color: #666;">R$ ${p.price.toFixed(2)}</small>
+        </div>
+    `).join('');
+    suggestionsContainer.style.display = filtered.length ? 'block' : 'none';
+}
+
+
+function selectProduct(productName) {
+    document.getElementById('newItem').value = productName;
+    document.getElementById('productSuggestions').style.display = 'none';
+     document.getElementById('productSuggestions').innerHTML = ''; // Clear suggestions after selecting
+}
+
+function addItem() {
+    const newItem = document.getElementById('newItem').value.trim();
+    if(!newItem) return;
+
+    const users = JSON.parse(localStorage.users || '[]');
+    const userIndex = users.findIndex(u => u.email === currentUser.email);
+     if (userIndex > -1) {
+        users[userIndex].list.push(newItem);
+        localStorage.users = JSON.stringify(users);
+        currentUser = users[userIndex];
+        if(document.getElementById('clientPanel').style.display === 'block') {
+            loadClientInterface();
+        }
+
+        alert(`"${newItem}" foi adicionado à sua lista de compras!`);
+    } else {
+         alert('Erro ao adicionar item à lista. Por favor, faça login novamente.');
+         logout();
+     }
+}
+
+function removeItem(item) {
+    const users = JSON.parse(localStorage.users || '[]');
+    const userIndex = users.findIndex(u => u.email === currentUser.email);
+     if (userIndex > -1) {
+        users[userIndex].list = users[userIndex].list.filter(i => i !== item);
+        localStorage.users = JSON.stringify(users);
+        currentUser = users[userIndex];
+        loadClientInterface();
+     } else {
+         alert('Erro ao remover item da lista. Por favor, faça login novamente.');
+         logout();
+     }
+}
+
+// =============================================
+// SISTEMA ADMIN GERAL
+// =============================================
+
+function adminLogin() {
+    const user = document.getElementById('adminUser').value;
+    const pass = document.getElementById('adminPass').value;
+
+    if(user === ADMIN_CREDENTIALS.user && pass === ADMIN_CREDENTIALS.pass) {
+        isAdmin = true;
+        currentUser = null; // Ensure client status is null
+        loggedInSupermarket = null; // Ensure supermarket status is null
+        document.getElementById('adminModal').style.display = 'none';
+        document.getElementById('loginArea').style.display = 'none';
+        document.getElementById('clientPanel').style.display = 'none';
+        document.getElementById('supermarketPanel').style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'block';
+         // Clear admin login fields on success
+        document.getElementById('adminUser').value = '';
+        document.getElementById('adminPass').value = '';
+        loadAdminData();
+         // Default to showing markets tab for admin
+         showAdminTab('markets');
+    } else {
+        alert('Credenciais de administrador inválidas!');
+    }
+}
+
+function showAdminTab(tab) {
+    if (!isAdmin) {
+         alert('Acesso negado.');
+         return;
+    }
+    document.querySelectorAll('#adminPanel .tabs .tab-btn').forEach(btn => {
+        if (btn.dataset.tab === tab) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    document.getElementById('adminMarkets').style.display = tab === 'markets' ? 'block' : 'none';
+    document.getElementById('adminProducts').style.display = tab === 'products' ? 'block' : 'none';
+    document.getElementById('adminMarketing').style.display = tab === 'marketing' ? 'block' : 'none';
+    document.getElementById('adminBackup').style.display = tab === 'backup' ? 'block' : 'none';
+    document.getElementById('adminSupermarketUsers').style.display = tab === 'supermarketUsers' ? 'block' : 'none';
+    document.getElementById('adminMarketDetail').style.display = 'none'; // Hide market detail when switching main admin tabs
+
+
+    // Reload data when switching tabs if necessary
+    if(tab === 'marketing') {
+        loadPromoBanners();
+    } else if (tab === 'products') {
+        loadAdminData(); // Reload all products for admin
+    } else if (tab === 'markets') {
+         loadAdminData(); // Reload all markets for admin
+    } else if (tab === 'supermarketUsers') {
+         loadSupermarketUsers(); // Load list of supermarket users
+    }
+}
+
+/**
+ * Carrega os dados administrativos (supermercados, produtos gerais, usuários supermercado).
+ * Comportamento difere para Admin Geral e Supermercado Logado (handled in loadSupermarketPanelData).
+ */
+function loadAdminData() {
+    // This function is primarily for the *General Admin* view
+    if (!isAdmin) {
+         // If a Supermarket is logged in, load their specific data instead
+         if (loggedInSupermarket) {
+             loadSupermarketPanelData();
+         }
+         return;
+    }
+
+    // Load all markets for General Admin
+    const markets = JSON.parse(localStorage.markets || '[]');
+    document.getElementById('marketList').innerHTML = markets.map(m => `
+        <div class="card" onclick="showMarketDetails(${m.id})" style="cursor: pointer;">
+            ${m.logo ? `<img src="${m.logo}" class="market-logo" alt="${m.name}">` : ''}
+            <h4>${m.name}</h4>
+            <p>${m.address}</p>
+            <p>CEP: ${m.cep}</p>
+            <p>Telefone: ${m.phone || 'Não informado'}</p>
+            <button onclick="event.stopPropagation(); deleteMarket(${m.id})">Excluir</button>
+        </div>
+    `).join('');
+
+    // Load all products for General Admin
+    const products = JSON.parse(localStorage.products || '[]');
+    const productListContainer = document.getElementById('productList');
+    productListContainer.innerHTML = products.map(p => {
+        const market = markets.find(m => m.id === p.marketId);
+        return `
+        <div class="card product-card" data-product-id="${p.id}">
+            ${p.onSale ? '<span class="sale-badge">OFERTA</span>' : ''}
+            <h4>${p.name} ${p.quantity ? `(${p.quantity}${p.unit})` : ''}</h4>
+            <p>Preço: R$ ${p.price.toFixed(2)}</p>
+            <p>Estoque: ${p.stock}</p>
+            <p>Supermercado: ${market?.name || 'Desconhecido'}</p>
+            ${p.image ? `<img src="${p.image}" alt="${p.name}" style="max-height: 100px;">` : ''}
+            ${p.video ? `<video src="${p.video}" style="max-height: 100px;" controls></video>` : ''}
+            <div style="margin-top: 10px;">
+                <button class="edit-product-btn" data-product-id="${p.id}" style="width: auto; background: var(--warning); margin-right: 5px;">Editar</button>
+                <button class="delete-product-btn" data-product-id="${p.id}">Excluir</button>
+            </div>
+        </div>
+        `;
+    }).join('');
+
+    // Add event listeners for edit/delete buttons in Admin Product List
+    productListContainer.querySelectorAll('.edit-product-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const productId = parseInt(btn.getAttribute('data-product-id'));
+            editProduct(productId); // Admin uses the same edit modal
+        });
+    });
+     productListContainer.querySelectorAll('.delete-product-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const productId = parseInt(btn.getAttribute('data-product-id'));
+            deleteProduct(productId); // Admin uses the same delete function
+        });
+    });
+
+
+    // Load Supermarket Users for General Admin
+    loadSupermarketUsers();
+}
+
+/**
+ * Carrega a lista de usuários supermercado no painel admin geral.
+ */
+function loadSupermarketUsers() {
+     if (!isAdmin) return; // Only admin can see this list
+
+    const supermarkets = JSON.parse(localStorage.supermarkets || '[]');
+    const markets = JSON.parse(localStorage.markets || '[]'); // Needed to show market names
+
+    const container = document.getElementById('supermarketUserList');
+    container.innerHTML = supermarkets.map(su => {
+        const market = markets.find(m => m.id === su.marketId);
+        return `
+            <div class="card">
+                <h4>${market?.name || 'Supermercado Desconhecido'}</h4>
+                <p>Email: ${su.email}</p>
+                <p>Market ID: ${su.marketId}</p>
+                 <div style="margin-top: 10px;">
+                    <button onclick="deleteSupermarketUser(${su.id})" style="width: auto;"><i class="fas fa-trash-alt"></i> Excluir Usuário</button>
+                 </div>
+            </div>
+        `;
+    }).join('');
+}
+
+/**
+ * Exclui um usuário supermercado (apenas para Admin Geral).
+ * @param {number} userId - O ID do usuário supermercado a ser excluído.
+ */
+function deleteSupermarketUser(userId) {
+     if (!isAdmin) {
+         alert('Acesso negado.');
+         return;
+     }
+     if (!confirm('Tem certeza que deseja excluir este usuário supermercado? Isso não exclui o supermercado associado nem seus produtos.')) {
+         return;
+     }
+
+    let supermarkets = JSON.parse(localStorage.supermarkets || '[]');
+    const initialCount = supermarkets.length;
+    supermarkets = supermarkets.filter(su => su.id !== userId);
+    localStorage.supermarkets = JSON.stringify(supermarkets);
+
+     if (supermarkets.length < initialCount) {
+         alert('Usuário supermercado excluído com sucesso.');
+         loadSupermarketUsers(); // Reload the list
+     } else {
+         alert('Erro ao excluir usuário supermercado. Usuário não encontrado.');
+     }
+}
+
+
+/**
+ * Carrega os banners promocionais com suporte completo (apenas para Admin Geral).
+ */
+function loadPromoBanners() {
+    if (!isAdmin) return; // Ensure only admin can load promo banners
+
+    const container = document.getElementById('promoList');
+    let promoBanners = JSON.parse(localStorage.promoBanners || '[]');
+
+    container.innerHTML = promoBanners.map(banner => `
+        <div class="card" data-banner-id="${banner.id}">
+            <div class="promo-banner" ${banner.link ? `onclick="window.open('${banner.link}', '_blank')"` : ''}>
+                ${banner.image ? `<img src="${banner.image}" alt="${banner.title}">` : ''}
+                <h3 class="promo-title">${banner.title}</h3>
+                <p class="promo-text">${banner.text}</p>
+                ${banner.link ? '<small style="display: block; margin-top: 10px;"><i class="fas fa-external-link-alt"></i> Clique para acessar</small>' : ''}
+            </div>
+            <div style="margin-top: 10px;">
+                <button class="edit-banner-btn" data-banner-id="${banner.id}" style="width: auto; background: var(--warning);">Editar</button>
+                <button class="delete-banner-btn" data-banner-id="${banner.id}">Excluir</button>
+            </div>
+        </div>
+    `).join('');
+
+    // Add event listeners for edit buttons
+    container.querySelectorAll('.edit-banner-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const bannerId = parseInt(btn.getAttribute('data-banner-id'));
+            editBanner(bannerId);
+        });
+    });
+    // Add event listeners for delete buttons
+    container.querySelectorAll('.delete-banner-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const bannerId = parseInt(btn.getAttribute('data-banner-id'));
+            deletePromoBanner(bannerId);
+        });
+    });
+}
+
+/**
+ * Função melhorada para salvar banners promocionais (apenas para Admin Geral).
+ */
+function savePromoBanner() {
+    if (!isAdmin) return; // Ensure only admin can save banners
+
+    const title = document.getElementById('promoTitle').value.trim();
+    const text = document.getElementById('promoText').value.trim();
+    const link = document.getElementById('promoLink').value.trim();
+    const image = promoImageBase64;
+
+    // Validações
+    if(!title || !text) {
+        alert('Preencha pelo menos o título e o texto do banner!');
+        return;
+    }
+
+    if(link && !link.match(/^https?:\/\//)) {
+        alert('O link deve começar com http:// ou https://');
+        return;
+    }
+
+    try {
+        let promoBanners = JSON.parse(localStorage.promoBanners || '[]');
+        const newBanner = {
+            id: Date.now(),
+            title,
+            text,
+            link: link || null,
+            image
+        };
+        promoBanners.push(newBanner);
+        localStorage.promoBanners = JSON.stringify(promoBanners);
+
+        // Limpar campos
+        document.getElementById('promoTitle').value = '';
+        document.getElementById('promoText').value = '';
+        document.getElementById('promoLink').value = '';
+        document.getElementById('promoImageInput').value = '';
+        document.getElementById('promoImagePreview').style.display = 'none';
+        promoImageBase64 = '';
+
+        // Recarregar e feedback
+        loadPromoBanners();
+        loadSpecialOffers(); // Update the main offer carousel
+        alert('Banner salvo com sucesso!');
+    } catch (e) {
+        console.error('Erro ao salvar banner:', e);
+        alert('Ocorreu um erro ao salvar o banner. Por favor, tente novamente.');
+    }
+}
+
+function editBanner(id) {
+     if (!isAdmin) return; // Ensure only admin can edit banners
+
+    const promoBanners = JSON.parse(localStorage.promoBanners || '[]');
+    const banner = promoBanners.find(b => b.id === id);
+    if(!banner) return;
+
+    currentEditBannerId = id;
+    document.getElementById('editBannerTitle').value = banner.title;
+    document.getElementById('editBannerText').value = banner.text;
+    document.getElementById('editBannerLink').value = banner.link || '';
+
+    const preview = document.getElementById('editBannerImagePreview');
+    if(banner.image) {
+        preview.src = banner.image;
+        preview.style.display = 'block';
+    } else {
+        preview.style.display = 'none';
+    }
+
+    editBannerImageBase64 = banner.image || '';
+    document.getElementById('editBannerModal').style.display = 'flex';
+}
+
+function updateBanner() {
+     if (!isAdmin) return; // Ensure only admin can update banners
+
+    const title = document.getElementById('editBannerTitle').value.trim();
+    const text = document.getElementById('editBannerText').value.trim();
+    const link = document.getElementById('editBannerLink').value.trim();
+    const image = editBannerImageBase64;
+
+    if(!title || !text) {
+        alert('Preencha pelo menos o título e o texto do banner!');
+        return;
+    }
+
+    // Validar link se foi preenchido
+    if(link && !link.match(/^https?:\/\//)) {
+        alert('O link deve começar com http:// ou https://');
+        return;
+    }
+
+    let promoBanners = JSON.parse(localStorage.promoBanners || '[]');
+    const bannerIndex = promoBanners.findIndex(b => b.id === currentEditBannerId);
+
+    if(bannerIndex >= 0) {
+        promoBanners[bannerIndex] = {
+            ...promoBanners[bannerIndex],
+            title,
+            text,
+            link: link || null,
+            image: image !== '' ? image : promoBanners[bannerIndex].image // Update image only if a new one was selected
+        };
+
+        localStorage.promoBanners = JSON.stringify(promoBanners);
+        closeEditBannerModal();
+        loadPromoBanners();
+        loadSpecialOffers(); // Update the main offer carousel
+        alert('Banner atualizado com sucesso!');
+    } else {
+         alert('Erro ao encontrar banner para atualizar.');
+         closeEditBannerModal();
+    }
+}
+
+function closeEditBannerModal() {
+    document.getElementById('editBannerModal').style.display = 'none';
+    currentEditBannerId = null;
+    editBannerImageBase64 = '';
+    document.getElementById('editBannerImageInput').value = '';
+    document.getElementById('editBannerImagePreview').style.display = 'none';
+     document.getElementById('editBannerImagePreview').src = ''; // Clear the preview image source
+}
+
+function deletePromoBanner(id) {
+    if (!isAdmin) return; // Ensure only admin can delete banners
+    if(!confirm('Tem certeza que deseja excluir este banner?')) return;
+    let promoBanners = JSON.parse(localStorage.promoBanners || '[]');
+    promoBanners = promoBanners.filter(b => b.id !== id);
+    localStorage.promoBanners = JSON.stringify(promoBanners);
+    loadPromoBanners();
+    loadSpecialOffers(); // Update the main offer carousel
+}
+
+
+function showMarketDetails(marketId) {
+     // Accessible by Admin General
+     if (!isAdmin) {
+         alert('Acesso negado.');
+         return;
+     }
+
+    const markets = JSON.parse(localStorage.markets || '[]');
+    const market = markets.find(m => m.id === marketId);
+
+    if(!market) return;
+    document.getElementById('adminMarkets').style.display = 'none';
+    document.getElementById('adminMarketDetail').style.display = 'block';
+    document.getElementById('marketDetailName').textContent = market.name;
+    document.getElementById('marketDetailName').setAttribute('data-market-id', marketId);
+
+    // Carregar produtos do supermercado e adicionar listeners de edição
+    const products = JSON.parse(localStorage.products || '[]');
+    const marketProducts = products.filter(p => p.marketId === marketId);
+    const productListContainer = document.getElementById('marketProductList');
+    productListContainer.innerHTML = marketProducts.map(p => `
+        <div class="card product-card" data-product-id="${p.id}">
+            ${p.onSale ? '<span class="sale-badge">OFERTA</span>' : ''}
+            <h4>${p.name} ${p.quantity ? `(${p.quantity}${p.unit})` : ''}</h4>
+            <p>Preço: R$ ${p.price.toFixed(2)}</p>
+            <p>Estoque: ${p.stock}</p>
+             ${p.image ? `<img src="${p.image}" alt="${p.name}" style="max-height: 100px; object-fit: contain; margin-top: 10px;">` : ''}
+            ${p.video ? `<video src="${p.video}" style="max-height: 100px;" controls></video>` : ''}
+            <div style="margin-top: 10px;">
+                <button class="edit-product-btn" data-product-id="${p.id}" style="width: auto; background: var(--warning); margin-right: 5px;">Editar</button>
+                <button onclick="toggleProductSale(${p.id}, ${!p.onSale})" style="background: ${p.onSale ? 'var(--danger)' : 'var(--success)'}; width: auto; margin-right: 5px;">
+                    ${p.onSale ? 'Remover Oferta' : 'Colocar em Oferta'}
+                </button>
+                <button onclick="deleteProduct(${p.id})" style="width: auto;">Excluir</button>
+            </div>
+        </div>
+    `).join('');
+
+     // Add event listeners for edit buttons in Market Detail Product List (Admin General)
+     productListContainer.querySelectorAll('.edit-product-btn').forEach(btn => {
+         btn.addEventListener('click', (e) => {
+             e.stopPropagation();
+             const productId = parseInt(btn.getAttribute('data-product-id'));
+             editProduct(productId);
+         });
+     });
+     // Delete and toggle sale listeners are already handled by the global deleteProduct and toggleProductSale
+
+
+}
+
+
+function backToMarkets() {
+     if (!isAdmin) return; // Ensure only admin can go back to markets
+
+    document.getElementById('adminMarkets').style.display = 'block';
+    document.getElementById('adminMarketDetail').style.display = 'none';
+    document.getElementById('marketDetailName').textContent = ''; // Clear market detail name
+    document.getElementById('marketDetailName').removeAttribute('data-market-id'); // Clear market id attribute
+    document.getElementById('marketProductList').innerHTML = ''; // Clear product list
+    document.getElementById('marketImportProgress').innerHTML = ''; // Clear import progress
+    loadAdminData(); // Reload the market list to ensure it's up-to-date
+     showAdminTab('markets'); // Explicitly show the markets tab
+}
+
+
+async function saveMarket() {
+     // This function is now primarily for admin to manually add a market, not for supermarket registration
+     if (!isAdmin) return; // Ensure only admin can save markets
+
+    const name = document.getElementById('marketName').value.trim();
+    const cep = document.getElementById('marketCep').value.trim();
+    const address = document.getElementById('marketAddress').value.trim();
+    const phone = document.getElementById('marketPhone').value.trim();
+    const logo = marketLogoBase64; // Uses marketLogoBase64 from admin form
+
+    if(!name || !cep || !address) {
+        alert('Preencha todos os campos obrigatórios (Nome, CEP, Endereço)!');
+        return;
+    }
+
+     if (!validateCEP(cep)) {
+         alert('CEP inválido! Digite um CEP com 8 dígitos.');
+         return;
+     }
+
+
+    const markets = JSON.parse(localStorage.markets || '[]');
+     // Check if a market with the same name or address already exists (simple check)
+     if (markets.some(m => m.name.toLowerCase() === name.toLowerCase() || m.address.toLowerCase() === address.toLowerCase())) {
+         alert('Um supermercado com este nome ou endereço já existe!');
+         return;
+     }
+
+    markets.push({
+        id: Date.now(),
+        name,
+        cep,
+        address,
+        phone,
+        logo
+    });
+    localStorage.markets = JSON.stringify(markets);
+
+    // Limpar campos
+    document.getElementById('marketName').value = '';
+    document.getElementById('marketCep').value = '';
+    document.getElementById('marketAddress').value = '';
+    document.getElementById('marketPhone').value = '';
+    document.getElementById('marketLogoInput').value = '';
+    document.getElementById('marketLogoPreview').style.display = 'none';
+    document.getElementById('marketLogoPreview').src = ''; // Clear the preview image source
+    marketLogoBase64 = ''; // Clear the base64 string
+
+    loadAdminData(); // Reload market list in admin panel
+    alert('Supermercado salvo com sucesso!');
+}
+
+function deleteMarket(id) {
+     if (!isAdmin) return; // Ensure only admin can delete markets
+    if(!confirm('Tem certeza que deseja excluir este supermercado? Todos os produtos e usuários parceiros associados também serão removidos.')) return;
+
+    let markets = JSON.parse(localStorage.markets || '[]');
+    const initialMarketCount = markets.length;
+    markets = markets.filter(m => m.id !== id);
+    localStorage.markets = JSON.stringify(markets);
+
+    if (markets.length < initialMarketCount) {
+         // Remover produtos associados
+        let products = JSON.parse(localStorage.products || '[]');
+        products = products.filter(p => p.marketId !== id);
+        localStorage.products = JSON.stringify(products);
+
+         // Remover usuários supermercado associados
+        let supermarketUsers = JSON.parse(localStorage.supermarkets || '[]');
+        supermarketUsers = supermarketUsers.filter(su => su.marketId !== id);
+        localStorage.supermarkets = JSON.stringify(supermarketUsers);
+
+
+        loadAdminData(); // Reload admin data (markets, products, supermarket users)
+        loadSpecialOffers(); // Update the main offer carousel
+        alert('Supermercado e dados associados excluídos com sucesso!');
+    } else {
+         alert('Erro ao excluir supermercado. Supermercado não encontrado.');
+    }
+}
+
+
+async function saveProduct() {
+     // This function is now primarily for admin to manually add a product to a market,
+     // or for editing products from the general admin product list.
+     // Supermarket users will use saveSupermarketProduct.
+     if (!isAdmin) {
+         alert('Acesso negado.');
+         return;
+     }
+
+
+    const marketId = parseInt(document.getElementById('productMarket').value); // Admin selects market
+    const name = document.getElementById('productName').value.trim();
+    const quantity = parseFloat(document.getElementById('productQuantity').value);
+    const price = parseFloat(document.getElementById('productPrice').value);
+    const stock = parseInt(document.getElementById('productStock').value);
+    const onSale = document.getElementById('productOnSale').checked;
+    const unit = document.querySelector('input[name="unit"]:checked').value;
+    const image = productImageBase64; // Uses productImageBase64 from admin form
+    const video = productVideoBase64; // Uses productVideoBase64 from admin form
+
+    if(!marketId || !name || isNaN(quantity) || isNaN(price) || isNaN(stock)) {
+        alert('Preencha todos os campos corretamente!');
+        return;
+    }
+
+    const products = JSON.parse(localStorage.products || '[]');
+
+     // Simple check for duplicate product within the same market
+     if (products.some(p => p.marketId === marketId && p.name.toLowerCase() === name.toLowerCase() && p.unit === unit && p.quantity === quantity)) {
+         alert('Já existe um produto com o mesmo nome, quantidade e unidade neste supermercado!');
+         return;
+     }
+
+    products.push({
+        id: Date.now(),
+        marketId,
+        name,
+        quantity,
+        unit,
+        price,
+        stock,
+        image,
+        video,
+        onSale
+    });
+    localStorage.products = JSON.stringify(products);
+
+    // Limpar fields
+    document.getElementById('productName').value = '';
+    document.getElementById('productQuantity').value = '';
+    document.getElementById('productPrice').value = '';
+    document.getElementById('productStock').value = '';
+    document.getElementById('productOnSale').checked = false;
+    document.getElementById('productImageInput').value = '';
+    document.getElementById('productImagePreview').style.display = 'none';
+    document.getElementById('productImagePreview').src = '';
+    document.getElementById('productVideoInput').value = '';
+    document.getElementById('productVideoPreview').style.display = 'none';
+    document.getElementById('productVideoPreview').src = '';
+    productImageBase64 = '';
+    productVideoBase64 = '';
+
+
+    loadAdminData(); // Reload product list in admin panel
+    loadSpecialOffers(); // Update the main offer carousel
+    alert('Produto salvo com sucesso (via Admin)!');
+}
+
+/**
+ * Edits an existing product. Used by both Admin General and Supermarket Panel.
+ * @param {number} productId - The ID of the product to edit.
+ */
+function editProduct(productId) {
+     // Check if Admin General or Supermarket is logged in
+     if (!isAdmin && !loggedInSupermarket) {
+         alert('Acesso negado.');
+         return;
+     }
+
+    const products = JSON.parse(localStorage.products || '[]');
+    const product = products.find(p => p.id === productId);
+    const markets = JSON.parse(localStorage.markets || '[]');
+
+
+    if(!product) {
+        alert('Produto não encontrado para edição.');
+        return;
+    }
+
+    // If a Supermarket is logged in, ensure they can only edit their own products
+    if (loggedInSupermarket && product.marketId !== loggedInSupermarket.marketId) {
+        alert('Você só pode editar seus próprios produtos.');
+        return;
+    }
+
+
+    currentEditProductId = productId;
+
+    // Preenche o formulário de edição
+    document.getElementById('editProductName').value = product.name;
+    document.querySelectorAll('input[name="editUnit"]').forEach(radio => {
+        if (radio.value === product.unit) {
+            radio.checked = true;
+        }
+    });
+    document.getElementById('editProductQuantity').value = product.quantity;
+    document.getElementById('editProductPrice').value = product.price;
+    document.getElementById('editProductStock').value = product.stock;
+    document.getElementById('editProductOnSale').checked = product.onSale;
+
+    // Handle the Market select visibility and value
+    const marketSelectGroup = document.getElementById('editProductMarketGroup');
+    const marketSelect = document.getElementById('editProductMarket');
+    if (isAdmin) {
+        // Admin sees and can change the market
+        marketSelectGroup.style.display = 'block';
+        marketSelect.innerHTML = markets.map(m =>
+            `<option value="${m.id}" ${m.id === product.marketId ? 'selected' : ''}>${m.name}</option>`
+        ).join('');
+    } else {
+        // Supermarket does not see the market select
+        marketSelectGroup.style.display = 'none';
+        // Store the marketId in a data attribute or similar if needed for update,
+        // but updateProduct already uses the loggedInSupermarket.marketId if applicable.
+        // For safety, let's ensure the correct marketId is used based on logged-in user type.
+    }
+
+
+    // Configura as pré-visualizações de imagem e vídeo
+    const imagePreview = document.getElementById('editProductImagePreview');
+    const videoPreview = document.getElementById('editProductVideoPreview');
+
+    if(product.image) {
+        imagePreview.src = product.image;
+        imagePreview.style.display = 'block';
+    } else {
+        imagePreview.style.display = 'none';
+         imagePreview.src = ''; // Clear the preview image source
+    }
+
+    if(product.video) {
+        videoPreview.src = product.video;
+        videoPreview.style.display = 'block';
+    } else {
+        videoPreview.style.display = 'none';
+        videoPreview.src = ''; // Clear the preview video source
+    }
+
+    editProductImageBase64 = product.image || '';
+    editProductVideoBase64 = product.video || '';
+
+    // Mostra o modal
+    document.getElementById('editProductModal').style.display = 'flex';
+}
+
+
+function closeEditModal() {
+    document.getElementById('editProductModal').style.display = 'none';
+    currentEditProductId = null;
+    editProductImageBase64 = '';
+    editProductVideoBase64 = '';
+
+    // Reset file inputs and previews
+    document.getElementById('editProductImageInput').value = '';
+    document.getElementById('editProductVideoInput').value = '';
+    document.getElementById('editProductImagePreview').style.display = 'none';
+    document.getElementById('editProductVideoPreview').style.display = 'none';
+    document.getElementById('editProductImagePreview').src = '';
+    document.getElementById('editProductVideoPreview').src = '';
+
+     // Ensure market select is visible for admin next time
+     document.getElementById('editProductMarketGroup').style.display = 'block';
+}
+
+
+function updateProduct() {
+    // Check if Admin General or Supermarket is logged in
+    if (!isAdmin && !loggedInSupermarket) {
+        alert('Acesso negado.');
+        return;
+    }
+
+    const name = document.getElementById('editProductName').value.trim();
+    const quantity = parseFloat(document.getElementById('editProductQuantity').value);
+    const price = parseFloat(document.getElementById('editProductPrice').value);
+    const stock = parseInt(document.getElementById('editProductStock').value);
+    const onSale = document.getElementById('editProductOnSale').checked;
+    const unit = document.querySelector('input[name="editUnit"]:checked').value;
+    const image = editProductImageBase64;
+    const video = editProductVideoBase64;
+
+    // Determine the marketId based on who is logged in
+    let marketId;
+    if (isAdmin) {
+         marketId = parseInt(document.getElementById('editProductMarket').value); // Admin uses the select
+    } else if (loggedInSupermarket) {
+         marketId = loggedInSupermarket.marketId; // Supermarket uses their own marketId
+    } else {
+         alert('Erro de autenticação.'); // Should not happen based on initial check
+         return;
+    }
+
+
+    if(!name || isNaN(quantity) || isNaN(price) || isNaN(stock)) {
+        alert('Preencha todos os campos corretamente!');
+        return;
+    }
+
+    let products = JSON.parse(localStorage.products || '[]');
+    const productIndex = products.findIndex(p => p.id === currentEditProductId);
+
+    if(productIndex >= 0) {
+        // Ensure the product being edited actually belongs to the logged-in supermarket if applicable
+        if (loggedInSupermarket && products[productIndex].marketId !== loggedInSupermarket.marketId) {
+             alert('Você só pode editar seus próprios produtos.');
+             closeEditModal();
+             return;
+        }
+         // If Admin, they can change the marketId. If Supermarket, it stays their marketId.
+         const finalMarketId = isAdmin ? marketId : products[productIndex].marketId;
+
+
+        products[productIndex] = {
+            ...products[productIndex],
+            marketId: finalMarketId, // Use the determined marketId
+            name,
+            quantity,
+            unit,
+            price,
+            stock,
+            onSale,
+            image: image !== '' ? image : products[productIndex].image, // Update image only if a new one was selected
+            video: video !== '' ? video : products[productIndex].video // Update video only if a new one was selected
+        };
+
+        localStorage.products = JSON.stringify(products);
+        closeEditModal();
+
+        // Recarrega a visualização baseada em quem está logado
+        if (isAdmin) {
+            // If Admin General, reload the appropriate list (general list or market detail list)
+             const adminMarketDetail = document.getElementById('adminMarketDetail');
+             if(adminMarketDetail.style.display === 'block') {
+                 const currentMarketIdDisplayed = parseInt(document.getElementById('marketDetailName').getAttribute('data-market-id'));
+                 // If the updated product belongs to the currently viewed market, reload details
+                 if (products[productIndex].marketId === currentMarketIdDisplayed) {
+                      showMarketDetails(currentMarketIdDisplayed);
+                 } else {
+                     loadAdminData(); // Otherwise, just reload the main product list view
+                     showAdminTab('products');
+                 }
+             } else {
+                 loadAdminData(); // If not in market detail view, reload the main product list
+                 showAdminTab('products'); // Ensure product tab is shown
+             }
+        } else if (loggedInSupermarket) {
+            // If Supermarket, reload their product list
+            loadSupermarketProducts(loggedInSupermarket.marketId);
+             // Stay on the 'Meus Produtos' tab
+             showSupermarketTab('myProducts');
+        }
+
+
+        loadSpecialOffers(); // Update the main offer carousel
+        alert('Produto atualizado com sucesso!');
+    } else {
+         alert('Erro ao encontrar produto para atualizar.');
+         closeEditModal();
+    }
+}
+
+
+function toggleProductSale(productId, onSale) {
+     // This function is used by both Admin General (via Market Detail) and Supermarket Panel
+     // Logic to check who is logged in is needed.
+     if (!isAdmin && !loggedInSupermarket) {
+         alert('Acesso negado.');
+         return;
+     }
+
+    let products = JSON.parse(localStorage.products || '[]');
+    const productIndex = products.findIndex(p => p.id === productId);
+    if(productIndex >= 0) {
+        // If a Supermarket is logged in, ensure they can only toggle their own products
+        if (loggedInSupermarket && products[productIndex].marketId !== loggedInSupermarket.marketId) {
+            alert('Você só pode alterar o status de oferta dos seus próprios produtos.');
+            return;
+        }
+
+        products[productIndex].onSale = onSale;
+        localStorage.products = JSON.stringify(products);
+
+        // Update the UI based on who is logged in
+        if (isAdmin) {
+             // If Admin General, reload the appropriate list (market detail list)
+             const adminMarketDetail = document.getElementById('adminMarketDetail');
+             if(adminMarketDetail.style.display === 'block') {
+                  const marketId = parseInt(document.getElementById('marketDetailName').getAttribute('data-market-id'));
+                  // Only reload market details if the product belongs to the current market view
+                  if (products[productIndex].marketId === marketId) {
+                       showMarketDetails(marketId);
+                  } else {
+                       loadAdminData(); // Otherwise, just reload the main product list view
+                       showAdminTab('products');
+                  }
+             } else {
+                 loadAdminData(); // Should not happen often for toggleSale, but keep for safety
+                 showAdminTab('products'); // Ensure product tab is shown
+             }
+        } else if (loggedInSupermarket) {
+             // If Supermarket, reload their product list
+             loadSupermarketProducts(loggedInSupermarket.marketId);
+              // Stay on the 'Meus Produtos' tab
+              showSupermarketTab('myProducts');
+        }
+
+        loadSpecialOffers(); // Atualiza os banners de oferta
+    } else {
+         alert('Erro ao encontrar produto para alternar oferta.');
+    }
+}
+
+
+// =============================================
+// SISTEMA SUPERMERCADO PARCEIRO
+// =============================================
+
+/**
+ * Registers a new supermarket user and creates a new market entry.
+ */
+function registerSupermarket() {
+    const name = document.getElementById('newMarketName').value.trim();
+    const cep = document.getElementById('newMarketCep').value.trim();
+    const address = document.getElementById('newMarketAddress').value.trim();
+    const phone = document.getElementById('newMarketPhone').value.trim();
+    const email = document.getElementById('supermarketUserEmail').value.trim();
+    const password = document.getElementById('supermarketUserPassword').value.trim();
+    const logo = newMarketLogoBase64; // Uses newMarketLogoBase64 from the registration form
+
+    if (!name || !cep || !address || !email || !password) {
+        alert('Preencha todos os campos obrigatórios (Nome, CEP, Endereço, Email, Senha)!');
+        return;
+    }
+
+     if (!validateCEP(cep)) {
+         alert('CEP inválido! Digite um CEP com 8 dígitos.');
+         return;
+     }
+
+
+    let markets = JSON.parse(localStorage.markets || '[]');
+    let supermarketUsers = JSON.parse(localStorage.supermarkets || '[]');
+
+     // Check for duplicate market name or address
+     if (markets.some(m => m.name.toLowerCase() === name.toLowerCase() || m.address.toLowerCase() === address.toLowerCase())) {
+         alert('Um supermercado com este nome ou endereço já existe!');
+         return;
+     }
+
+     // Check for duplicate supermarket user email
+     if (supermarketUsers.some(su => su.email === email)) {
+         alert('Este email já está cadastrado como usuário parceiro.');
+         return;
+     }
+
+    // Create new market entry
+    const newMarketId = Date.now(); // Use timestamp for unique ID
+    const newMarket = {
+        id: newMarketId,
+        name,
+        cep,
+        address,
+        phone: phone || 'Não informado', // Phone is optional
+        logo
+    };
+    markets.push(newMarket);
+    localStorage.markets = JSON.stringify(markets);
+
+    // Create new supermarket user entry
+    const newSupermarketUser = {
+        id: Date.now() + 1, // Ensure unique ID, different from market ID
+        marketId: newMarketId, // Link to the newly created market
+        email,
+        password
+    };
+    supermarketUsers.push(newSupermarketUser);
+    localStorage.supermarkets = JSON.stringify(supermarketUsers);
+
+    alert('Supermercado parceiro cadastrado com sucesso! Faça login para acessar seu painel.');
+
+    // Clear registration form fields
+    document.getElementById('newMarketName').value = '';
+    document.getElementById('newMarketCep').value = '';
+    document.getElementById('newMarketAddress').value = '';
+    document.getElementById('newMarketPhone').value = '';
+    document.getElementById('supermarketUserEmail').value = '';
+    document.getElementById('supermarketUserPassword').value = '';
+    document.getElementById('newMarketLogoInput').value = '';
+    document.getElementById('newMarketLogoPreview').style.display = 'none';
+    document.getElementById('newMarketLogoPreview').src = '';
+    newMarketLogoBase64 = '';
+
+    // Switch to the supermarket login tab
+    document.querySelector('input[name="loginType"][value="supermarket"]').checked = true;
+    showLoginTab('supermarketLogin');
+}
+
+/**
+ * Handles login for supermarket users.
+ */
+function supermarketLogin() {
+    const email = document.getElementById('supermarketEmail').value.trim();
+    const password = document.getElementById('supermarketPassword').value.trim();
+    const supermarketUsers = JSON.parse(localStorage.supermarkets || '[]');
+
+    const user = supermarketUsers.find(su => su.email === email && su.password === password);
+
+    if (user) {
+        loggedInSupermarket = user;
+        currentUser = null; // Ensure client status is null
+        isAdmin = false; // Ensure admin status is false
+        document.getElementById('loginArea').style.display = 'none';
+        document.getElementById('clientPanel').style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'none';
+        document.getElementById('supermarketPanel').style.display = 'block';
+
+        // Clear supermarket login fields on success
+        document.getElementById('supermarketEmail').value = '';
+        document.getElementById('supermarketPassword').value = '';
+
+        loadSupermarketPanelData();
+         // Default to showing market details tab for supermarket
+         showSupermarketTab('myDetails');
+
+    } else {
+        alert('Email ou senha incorretos para login de supermercado.');
+    }
+}
+
+/**
+ * Shows the specified tab in the supermarket panel.
+ * @param {string} tabId - The ID of the tab content div to show (e.g., 'myDetails', 'myProducts').
+ */
+function showSupermarketTab(tabId) {
+     if (!loggedInSupermarket) {
+         alert('Acesso negado.');
+         logout(); // Force logout if somehow they reached here without login
+         return;
+     }
+     document.querySelectorAll('#supermarketPanel .tabs .tab-btn').forEach(btn => {
+         if (btn.dataset.tab === tabId) {
+             btn.classList.add('active');
+         } else {
+             btn.classList.remove('active');
+         }
+     });
+     document.getElementById('supermarketMyDetails').style.display = tabId === 'myDetails' ? 'block' : 'none';
+     document.getElementById('supermarketMyProducts').style.display = tabId === 'myProducts' ? 'block' : 'none';
+
+
+     // Load data when switching tabs if necessary
+     if (tabId === 'myDetails') {
+         loadSupermarketMarketDetails(); // Load details for the logged-in market
+     } else if (tabId === 'myProducts') {
+         loadSupermarketProducts(loggedInSupermarket.marketId); // Load products for the logged-in market
+     }
+}
+
+/**
+ * Loads the details of the logged-in supermarket into their panel.
+ */
+function loadSupermarketMarketDetails() {
+     if (!loggedInSupermarket) return;
+
+     const markets = JSON.parse(localStorage.markets || '[]');
+     const myMarket = markets.find(m => m.id === loggedInSupermarket.marketId);
+     const container = document.getElementById('myMarketDetailsContent');
+
+     if (myMarket) {
+         container.innerHTML = `
+             <div class="card">
+                ${myMarket.logo ? `<img src="${myMarket.logo}" class="market-logo" alt="${myMarket.name}">` : ''}
+                <h4>${myMarket.name}</h4>
+                <p><strong>ID:</strong> ${myMarket.id}</p> <p><strong>CEP:</strong> ${myMarket.cep}</p>
+                <p><strong>Endereço:</strong> ${myMarket.address}</p>
+                <p><strong>Telefone:</strong> ${myMarket.phone || 'Não informado'}</p>
+                </div>
+         `;
+     } else {
+         container.innerHTML = '<p>Não foi possível carregar os detalhes do seu supermercado.</p>';
+     }
+}
+
+
+/**
+ * Loads the products for the logged-in supermarket into their panel.
+ * @param {number} marketId - The ID of the market whose products to load.
+ */
+function loadSupermarketProducts(marketId) {
+     if (!loggedInSupermarket || loggedInSupermarket.marketId !== marketId) {
+         alert('Acesso negado.');
+         logout();
+         return;
+     }
+
+     const products = JSON.parse(localStorage.products || '[]');
+     const myProducts = products.filter(p => p.marketId === marketId);
+     const container = document.getElementById('supermarketProductList');
+
+     container.innerHTML = myProducts.map(p => `
+        <div class="card product-card" data-product-id="${p.id}">
+            ${p.onSale ? '<span class="sale-badge">OFERTA</span>' : ''}
+            <h4>${p.name} ${p.quantity ? `(${p.quantity}${p.unit})` : ''}</h4>
+            <p>Preço: R$ ${p.price.toFixed(2)}</p>
+            <p>Estoque: ${p.stock}</p>
+            ${p.image ? `<img src="${p.image}" alt="${p.name}" style="max-height: 100px;">` : ''}
+            ${p.video ? `<video src="${p.video}" style="max-height: 100px;" controls></video>` : ''}
+            <div style="margin-top: 10px;">
+                <button class="edit-product-btn" data-product-id="${p.id}" style="width: auto; background: var(--warning);">Editar</button>
+                <button onclick="toggleProductSale(${p.id}, ${!p.onSale})" style="background: ${p.onSale ? 'var(--danger)' : 'var(--success)'}; width: auto; margin-right: 5px;">
+                    ${p.onSale ? 'Remover Oferta' : 'Colocar em Oferta'}
+                </button>
+                <button onclick="deleteProduct(${p.id})" style="width: auto;">Excluir</button>
+            </div>
+        </div>
+     `).join('');
+
+     // Add event listeners for edit buttons in Supermarket Product List
+     container.querySelectorAll('.edit-product-btn').forEach(btn => {
+         btn.addEventListener('click', (e) => {
+             e.stopPropagation();
+             const productId = parseInt(btn.getAttribute('data-product-id'));
+             editProduct(productId); // Supermarket uses the same edit modal
+         });
+     });
+     // Delete and toggle sale listeners are already handled by the global deleteProduct and toggleProductSale
+}
+
+/**
+ * Loads the data for the currently logged-in user's panel.
+ * Called after successful login or data updates.
+ */
+function loadSupermarketPanelData() {
+     if (!loggedInSupermarket) return;
+
+     // Load supermarket details
+     loadSupermarketMarketDetails();
+
+     // Load supermarket products
+     loadSupermarketProducts(loggedInSupermarket.marketId);
+
+     // Default to showing the details tab
+     showSupermarketTab('myDetails');
+}
+
+/**
+ * Saves a new product from the supermarket panel form.
+ */
+function saveSupermarketProduct() {
+     if (!loggedInSupermarket) {
+         alert('Faça login como supermercado para adicionar produtos.');
+         return;
+     }
+
+     const marketId = loggedInSupermarket.marketId; // Automatically assign to logged-in market
+     const name = document.getElementById('supermarketProductName').value.trim();
+     const quantity = parseFloat(document.getElementById('supermarketProductQuantity').value);
+     const price = parseFloat(document.getElementById('supermarketProductPrice').value);
+     const stock = parseInt(document.getElementById('supermarketProductStock').value);
+     const onSale = document.getElementById('supermarketProductOnSale').checked;
+     const unit = document.querySelector('input[name="supermarketUnit"]:checked').value;
+     const image = supermarketProductImageBase64; // Uses supermarketProductImageBase64
+     const video = supermarketProductVideoBase64; // Uses supermarketProductVideoBase64
+
+    if(!name || isNaN(quantity) || isNaN(price) || isNaN(stock)) {
+        alert('Preencha todos os campos do produto corretamente!');
+        return;
+    }
+
+    const products = JSON.parse(localStorage.products || '[]');
+
+     // Simple check for duplicate product within the same market
+     if (products.some(p => p.marketId === marketId && p.name.toLowerCase() === name.toLowerCase() && p.unit === unit && p.quantity === quantity)) {
+         alert('Já existe um produto com o mesmo nome, quantidade e unidade neste supermercado!');
+         return;
+     }
+
+    products.push({
+        id: Date.now(),
+        marketId,
+        name,
+        quantity,
+        unit,
+        price,
+        stock,
+        image,
+        video,
+        onSale
+    });
+    localStorage.products = JSON.stringify(products);
+
+    // Clear form fields
+    document.getElementById('supermarketProductName').value = '';
+    document.getElementById('supermarketProductQuantity').value = '';
+    document.getElementById('supermarketProductPrice').value = '';
+    document.getElementById('supermarketProductStock').value = '';
+    document.getElementById('supermarketProductOnSale').checked = false;
+    document.getElementById('supermarketProductImageInput').value = '';
+    document.getElementById('supermarketProductImagePreview').style.display = 'none';
+    document.getElementById('supermarketProductImagePreview').src = '';
+    document.getElementById('supermarketProductVideoInput').value = '';
+    document.getElementById('supermarketProductVideoPreview').style.display = 'none';
+    document.getElementById('supermarketProductVideoPreview').src = '';
+    supermarketProductImageBase64 = '';
+    supermarketProductVideoBase64 = '';
+
+
+    loadSupermarketProducts(marketId); // Reload the supermarket's product list
+    loadSpecialOffers(); // Update the main offer carousel
+    alert('Produto salvo com sucesso!');
+}
+
+
+/**
+ * Handles drag over event for supermarket product list upload.
+ */
+function handleSupermarketProductListDrop(event) {
+     if (!loggedInSupermarket) return; // Only logged-in supermarket can drop files
+     event.preventDefault();
+     const file = event.dataTransfer.files[0];
+     if(file) handleSupermarketProductListUpload(file);
+}
+
+
+/**
+ * Handles uploading a product list CSV for the logged-in supermarket.
+ * @param {File} file - The CSV file to upload.
+ */
+async function handleSupermarketProductListUpload(file) {
+     if (!loggedInSupermarket) {
+         alert('Faça login como supermercado para importar produtos.');
+         // Clear the file input
+         const fileInput = document.getElementById('supermarketProductListInput');
+         if(fileInput) fileInput.value = '';
+         return;
+     }
+
+    if(!file.name.endsWith('.csv')) {
+        alert('Por favor, selecione um arquivo CSV!');
+        // Clear the file input
+        const fileInput = document.getElementById('supermarketProductListInput');
+        if(fileInput) fileInput.value = '';
+        return;
+    }
+
+    const marketId = loggedInSupermarket.marketId;
+    const importProgressElement = document.getElementById('supermarketProductImportProgress');
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        const csv = e.target.result;
+        const newProducts = parseCSV(csv, marketId); // Use the existing parseCSV with marketId
+
+        if (newProducts.length === 0) {
+             importProgressElement.innerHTML = '<p style="color: var(--warning);">Nenhum produto válido encontrado no arquivo CSV.</p>';
+             // Clear the file input
+             const fileInput = document.getElementById('supermarketProductListInput');
+             if(fileInput) fileInput.value = '';
+             return;
+        }
+
+        importProgressElement.innerHTML = `
+            <p>Processando ${newProducts.length} produtos...</p>
+            <progress value="0" max="${newProducts.length}"></progress>
+        `;
+        let products = JSON.parse(localStorage.products || '[]');
+
+        for(let i = 0; i < newProducts.length; i++) {
+            const newProduct = newProducts[i];
+
+            // Ensure the product from CSV is assigned to the logged-in market
+            newProduct.marketId = marketId;
+
+            const existingIndex = products.findIndex(p =>
+                p.marketId === newProduct.marketId &&
+                p.name.toLowerCase() === newProduct.name.toLowerCase() &&
+                 p.unit === newProduct.unit &&
+                 p.quantity === newProduct.quantity
+            );
+
+            if(existingIndex >= 0) {
+                // Atualiza produto existente (apenas estoque, preço e oferta)
+                products[existingIndex].stock += newProduct.stock;
+                products[existingIndex].price = newProduct.price;
+                products[existingIndex].onSale = newProduct.onSale;
+                // Keep existing image and video if available, otherwise use from CSV if any
+                if (newProduct.image) products[existingIndex].image = newProduct.image;
+                if (newProduct.video) products[existingIndex].video = newProduct.video;
+
+            } else {
+                // Adiciona novo produto
+                newProduct.id = Date.now() + i; // Ensure unique ID
+                products.push(newProduct);
+            }
+
+            document.querySelector('#supermarketProductImportProgress progress').value = i + 1;
+            await new Promise(resolve => setTimeout(resolve, 20)); // Small delay to show progress
+        }
+
+        localStorage.products = JSON.stringify(products);
+        importProgressElement.innerHTML += `
+            <p style="color: var(--success);">Importação concluída com sucesso! ${newProducts.length} produtos processados.</p>
+        `;
+        // Recarrega os produtos do supermercado
+        loadSupermarketProducts(marketId);
+        loadSpecialOffers(); // Update the main offer carousel
+
+         // Clear the file input
+         const fileInput = document.getElementById('supermarketProductListInput');
+         if(fileInput) fileInput.value = '';
+
+    };
+    reader.onerror = function(event) {
+        console.error('Erro na leitura do arquivo:', event.target.error);
+        importProgressElement.innerHTML = '<p style="color: var(--danger);">Erro ao ler o arquivo de importação.</p>';
+        // Clear the file input
+        const fileInput = document.getElementById('supermarketProductListInput');
+        if(fileInput) fileInput.value = '';
+    };
+
+    reader.readAsText(file);
+}
+
+
+// =============================================
+// FUNÇÕES PARA BACKUP E RESTAURAÇÃO
+// =============================================
+
+/**
+ * Cria um backup dos dados do sistema e permite o download como arquivo JSON (apenas para Admin Geral).
+ */
+function createBackup() {
+    if (!isAdmin) {
+        alert('Acesso negado. Faça login como administrador para fazer backup.');
+        return;
+    }
+
+    try {
+        const backupData = {
+            markets: JSON.parse(localStorage.markets || '[]'),
+            products: JSON.parse(localStorage.products || '[]'),
+            promoBanners: JSON.parse(localStorage.promoBanners || '[]'),
+            users: JSON.parse(localStorage.users || '[]'),
+            supermarkets: JSON.parse(localStorage.supermarkets || '[]') // Include supermarket users
+        };
+
+        const jsonString = JSON.stringify(backupData, null, 2); // Use 2 spaces for indentation
+        const blob = new Blob([jsonString], { type: 'application/json' });
+
+        const now = new Date();
+        const filename = `supermarket_backup_${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}_${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}${now.getSeconds().toString().padStart(2, '0')}.json`;
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+
+        // Clean up after download
+        setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }, 0);
+
+        alert('Backup criado com sucesso!');
+
+    } catch (e) {
+        console.error('Erro ao criar backup:', e);
+        alert('Ocorreu um erro ao criar o arquivo de backup.');
+    }
+}
+
+/**
+ * Restaura os dados do sistema a partir de um arquivo de backup JSON selecionado pelo usuário (apenas para Admin Geral).
+ */
+function restoreBackup() {
+    if (!isAdmin) {
+        alert('Acesso negado. Faça login como administrador para restaurar backup.');
+        document.getElementById('backupFileInput').value = ''; // Clear the file input
+        return;
+    }
+
+    const fileInput = document.getElementById('backupFileInput');
+    const file = fileInput.files[0];
+
+    if (!file) {
+        alert('Por favor, selecione um arquivo de backup JSON.');
+        return;
+    }
+
+    if (!file.name.endsWith('.json')) {
+        alert('Formato de arquivo inválido. Selecione um arquivo .json.');
+        fileInput.value = ''; // Clear the file input
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function(event) {
+        try {
+            const backupData = JSON.parse(event.target.result);
+
+            // Simple validation of backup data structure
+            if (
+                typeof backupData === 'object' &&
+                backupData !== null &&
+                Array.isArray(backupData.markets) &&
+                Array.isArray(backupData.products) &&
+                Array.isArray(backupData.promoBanners) &&
+                Array.isArray(backupData.users) &&
+                Array.isArray(backupData.supermarkets) // Validate new supermarkets key
+            ) {
+                // Confirm before overwriting data
+                if (confirm('Tem certeza que deseja restaurar este backup? Todos os dados atuais (incluindo supermercados e usuários parceiros) serão substituídos!')) {
+                    localStorage.setItem('markets', JSON.stringify(backupData.markets));
+                    localStorage.setItem('products', JSON.stringify(backupData.products));
+                    localStorage.setItem('promoBanners', JSON.stringify(backupData.promoBanners));
+                    localStorage.setItem('users', JSON.stringify(backupData.users));
+                    localStorage.setItem('supermarkets', JSON.stringify(backupData.supermarkets)); // Restore supermarket users
+
+                    alert('Backup restaurado com sucesso! O sistema será recarregado.');
+                    // Reload necessary parts of the UI
+                    loadAdminData(); // Reload admin panels
+                    loadSpecialOffers(); // Reload banners
+                     // Optionally, force a full page reload if necessary to ensure all data is fresh
+                     // window.location.reload(); // Uncomment if a full reload is needed
+
+                } else {
+                     alert('Restauração cancelada.');
+                }
+
+            } else {
+                alert('Formato do arquivo de backup inválido. Certifique-se de que é um arquivo JSON válido do sistema.');
+            }
+        } catch (e) {
+            console.error('Erro ao ler ou analisar arquivo de backup:', e);
+            alert('Ocorreu um erro ao processar o arquivo de backup.');
+        } finally {
+             fileInput.value = ''; // Clear the file input regardless of success/failure
+        }
+    };
+
+    reader.onerror = function(event) {
+        console.error('Erro na leitura do arquivo:', event.target.error);
+        alert('Erro ao ler o arquivo de backup.');
+        fileInput.value = ''; // Clear the file input
+    };
+
+    reader.readAsText(file);
+}
+
+
+// =============================================
+// FUNÇÕES PARA IMPORTAÇÃO INDIVIDUAL (VIA DETALHES DO MERCADO)
+// =============================================
+// Essas funções são mantidas para a importação individual de produtos via detalhes do mercado (Admin Geral).
+
+function findSimilarProductImage(productName) {
+     // This function is still used by handleMarketFile and handleSupermarketProductListUpload
+     const products = JSON.parse(localStorage.products || '[]');
+     const words = productName.toLowerCase().split(' ').filter(word => word.length > 0);
+
+     const similarProducts = products.filter(p => {
+         return words.some(word => p.name.toLowerCase().includes(word)) && p.image;
+     });
+     return similarProducts.length > 0 ? similarProducts[0].image : '';
+}
+
+
+function parseCSV(csv, marketIdForNewProducts) {
+    // This function is used by handleMarketFile and handleSupermarketProductListUpload
+    const lines = csv.split('\n').filter(line => line.trim() !== '');
+    if (lines.length === 0) return [];
+
+    const headers = lines[0].split(';').map(h => h.trim().toLowerCase());
+    const products = [];
+
+    for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(';');
+        // Ensure enough columns based on the expected headers
+        if (values.length < 6) { // Expecting nome;preço;estoque;unidade;quantidade;oferta
+            console.warn(`Skipping line ${i + 1} due to incorrect format (expected 6 columns separated by ;): ${lines[i]}`);
+            continue;
+        }
+
+        const product = {
+            marketId: parseInt(marketIdForNewProducts),
+            onSale: false, // Default to false, will be overwritten by CSV
+            unit: 'un', // Default unit, will be overwritten by CSV
+            quantity: 1, // Default quantity, will be overwritten by CSV
+            image: '', // Will be populated later if a similar product exists
+            video: '' // No video in CSV import format
+        };
+
+        headers.forEach((header, index) => {
+            // Safely access values array to prevent errors if column is missing (though checked above)
+            const value = values[index] ? values[index].trim() : '';
+
+            if(header === 'nome') {
+                product.name = value;
+                 if (product.name) {
+                     product.image = findSimilarProductImage(product.name);
+                 }
+            } else if(header === 'preço') {
+                 // Handle comma as decimal separator if present, then parse float
+                product.price = parseFloat(value.replace(',', '.'));
+            } else if(header === 'estoque') {
+                product.stock = parseInt(value);
+            } else if(header === 'oferta') {
+                product.onSale = value.toLowerCase() === 'sim';
+            } else if(header === 'unidade') {
+                product.unit = value || 'un'; // Use provided unit or default to 'un'
+            } else if(header === 'quantidade') {
+                 // Handle comma as decimal separator if present, then parse float
+                product.quantity = parseFloat(value.replace(',', '.')) || 1; // Use provided quantity or default to 1
+            }
+        });
+
+         // Basic validation for required fields and numeric values
+         if (product.name && !isNaN(product.price) && !isNaN(product.stock)) {
+             products.push(product);
+         } else {
+             console.warn(`Skipping product due to invalid data: ${JSON.stringify(product)}`);
+         }
+    }
+    return products;
+}
+
+
+async function handleMarketFile(file) {
+     if (!isAdmin) return; // Only Admin General can use this specific import via market details
+
+    if(!file.name.endsWith('.csv')) {
+        alert('Por favor, selecione um arquivo CSV!');
+        return;
+    }
+
+    const marketId = document.querySelector('#adminMarketDetail h2 span').getAttribute('data-market-id');
+     if (!marketId) {
+         alert('Erro: Não foi possível identificar o supermercado para importar os produtos.');
+         // Clear the file input
+         const fileInput = document.getElementById('marketCsvInput');
+         if(fileInput) fileInput.value = '';
+         return;
+     }
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        const csv = e.target.result;
+        const newProducts = parseCSV(csv, marketId); // Use the existing parseCSV with marketId
+
+        if (newProducts.length === 0) {
+             document.getElementById('marketImportProgress').innerHTML = '<p style="color: var(--warning);">Nenhum produto válido encontrado no arquivo CSV.</p>';
+             // Clear the file input
+             const fileInput = document.getElementById('marketCsvInput');
+             if(fileInput) fileInput.value = '';
+             return;
+        }
+
+        document.getElementById('marketImportProgress').innerHTML = `
+            <p>Processando ${newProducts.length} produtos...</p>
+            <progress value="0" max="${newProducts.length}"></progress>
+        `;
+        let products = JSON.parse(localStorage.products || '[]');
+
+        for(let i = 0; i < newProducts.length; i++) {
+            const newProduct = newProducts[i];
+
+            // Ensure the product from CSV is assigned to the correct market
+            newProduct.marketId = parseInt(marketId); // Explicitly parse to integer
+
+            const existingIndex = products.findIndex(p =>
+                p.marketId === newProduct.marketId &&
+                p.name.toLowerCase() === newProduct.name.toLowerCase() &&
+                 p.unit === newProduct.unit &&
+                 p.quantity === newProduct.quantity
+            );
+
+            if(existingIndex >= 0) {
+                // Atualiza produto existente (apenas estoque, preço e oferta)
+                products[existingIndex].stock += newProduct.stock; // Add stock
+                products[existingIndex].price = newProduct.price;
+                products[existingIndex].onSale = newProduct.onSale;
+                // Keep existing image and video if available, otherwise use from CSV if any (CSV only has image implicitly)
+                if (newProduct.image) products[existingIndex].image = newProduct.image;
+                // CSV doesn't support video, so no update needed for video from CSV
+            } else {
+                // Adiciona novo produto
+                newProduct.id = Date.now() + i; // Ensure unique ID
+                 // Image was already populated by findSimilarProductImage in parseCSV
+                 // Video is not part of this CSV import, set to empty if not already
+                 if (newProduct.video === undefined) newProduct.video = '';
+                products.push(newProduct);
+            }
+
+            document.querySelector('#marketImportProgress progress').value = i + 1;
+            await new Promise(resolve => setTimeout(resolve, 20)); // Small delay to show progress
+        }
+
+        localStorage.products = JSON.stringify(products);
+        document.getElementById('marketImportProgress').innerHTML += `
+            <p style="color: var(--success);">Importação concluída com sucesso! ${newProducts.length} produtos processados.</p>
+        `;
+        // Recarrega os produtos do mercado
+        showMarketDetails(parseInt(marketId));
+        loadSpecialOffers(); // Update the main offer carousel
+
+         // Clear the file input
+         const fileInput = document.getElementById('marketCsvInput');
+         if(fileInput) fileInput.value = '';
+
+    };
+    reader.onerror = function(event) {
+        console.error('Erro na leitura do arquivo:', event.target.error);
+        document.getElementById('marketImportProgress').innerHTML = '<p style="color: var(--danger);">Erro ao ler o arquivo de importação.</p>';
+        // Clear the file input
+        const fileInput = document.getElementById('marketCsvInput');
+        if(fileInput) fileInput.value = '';
+    };
+
+    reader.readAsText(file);
+}
+
+// The general `handleFile` and `parseCSV` (without marketId parameter) are removed
+// as the general import tab is replaced by backup/restore.
+
+// =============================================
+// SISTEMA DE BUSCA (CLIENTE)
+// =============================================
+
+function calculateBest() {
+    if(!currentUser || !currentUser.list.length) {
+        alert('Adicione itens à sua lista primeiro!');
+        return;
+    }
+
+    const markets = JSON.parse(localStorage.markets || '[]');
+    const products = JSON.parse(localStorage.products || '[]');
+
+    if (markets.length === 0) {
+         document.getElementById('results').innerHTML = '<div class="card"><p>Nenhum supermercado cadastrado no sistema.</p></div>';
+         return;
+    }
+
+    if (products.length === 0) {
+         document.getElementById('results').innerHTML = '<div class="card"><p>Nenhum produto cadastrado no sistema.</p></div>';
+         return;
+    }
+
+
+    // Primeiro, encontre todos os produtos que correspondem aos itens da lista do cliente
+    const matchedProducts = [];
+    currentUser.list.forEach(itemName => {
+         // Find all products that contain the item name (case insensitive) and have stock
+        const matching = products.filter(p =>
+            p.name.toLowerCase().includes(itemName.toLowerCase()) && p.stock > 0
+        );
+        matchedProducts.push(...matching);
+    });
+
+
+     if (matchedProducts.length === 0) {
+         document.getElementById('results').innerHTML = '<div class="card"><p>Nenhum produto da sua lista encontrado com estoque disponível em nenhum supermercado.</p></div>';
+         return;
+     }
+
+    // Agrupe os produtos por supermercado
+    const marketProducts = {};
+    matchedProducts.forEach(product => {
+        if(!marketProducts[product.marketId]) {
+            marketProducts[product.marketId] = [];
+        }
+        marketProducts[product.marketId].push(product);
+    });
+
+    // Para cada supermercado, calcule:
+    // 1. Quantos itens únicos da lista estão disponíveis
+    // 2. O preço total desses itens (usando o produto mais barato para cada item)
+    // 3. A média de preços por item
+    const marketStats = Object.keys(marketProducts).map(marketId => {
+        const market = markets.find(m => m.id == marketId); // Use == for potential string/number comparison
+        const productsInMarket = marketProducts[marketId];
+
+        // Contagem de itens únicos da lista que estão disponíveis neste mercado e cálculo do preço total
+        const uniqueItemsFound = new Set();
+        let totalPrice = 0;
+
+        currentUser.list.forEach(itemName => {
+            // Encontra o produto mais barato para este item neste mercado com estoque > 0
+            const matchingProductsWithStock = productsInMarket.filter(p =>
+                p.name.toLowerCase().includes(itemName.toLowerCase()) && p.stock > 0
+            );
+
+            if(matchingProductsWithStock.length > 0) {
+                // Ordena por preço e pega o mais barato
+                matchingProductsWithStock.sort((a, b) => a.price - b.price);
+                const cheapest = matchingProductsWithStock[0];
+
+                uniqueItemsFound.add(itemName.toLowerCase());
+                totalPrice += cheapest.price;
+            }
+        });
+
+        return {
+            market,
+            uniqueItemCount: uniqueItemsFound.size,
+            totalPrice,
+            avgPrice: uniqueItemsFound.size > 0 ? totalPrice / uniqueItemsFound.size : 0,
+            distance: calculateDistance(currentUser.cep, market.cep),
+            completeness: ((uniqueItemsFound.size / currentUser.list.length) * 100).toFixed(1),
+            products: productsInMarket // Keep all products in market for detailed view
+        };
+    }).filter(stats => stats.uniqueItemCount > 0); // Only include markets that have at least one item from the list
+
+
+     if (marketStats.length === 0) {
+         document.getElementById('results').innerHTML = '<div class="card"><p>Nenhum supermercado encontrado com produtos da sua lista que tenham estoque disponível.</p></div>';
+         return;
+     }
+
+    // Ordenar os mercados por:
+    // 1. Maior número de itens únicos disponíveis (desc)
+    // 2. Menor preço total (asc)
+    // 3. Menor distância (asc)
+    marketStats.sort((a, b) => {
+        if(b.uniqueItemCount !== a.uniqueItemCount) return b.uniqueItemCount - a.uniqueItemCount;
+        if(a.totalPrice !== b.totalPrice) return a.totalPrice - b.totalPrice;
+        // Assuming distance is a string like "X km" or "Menos de 1 km". Convert to number for sorting.
+        const distanceA = a.distance.includes('Muito perto') ? 0 : parseFloat(a.distance.replace(' km', '').replace('Distância desconhecida', 'Infinity'));
+        const distanceB = b.distance.includes('Muito perto') ? 0 : parseFloat(b.distance.replace(' km', '').replace('Distância desconhecida', 'Infinity'));
+
+         // Handle cases where distance is not a number after removing " km"
+         const finalDistanceA = isNaN(distanceA) ? Infinity : distanceA;
+         const finalDistanceB = isNaN(distanceB) ? Infinity : distanceB;
+
+
+        return finalDistanceA - finalDistanceB;
+    });
+
+    // Exibir resultados
+    displayBestMarketResults(marketStats);
+}
+
+
+function calculateDistance(cep1, cep2) {
+    // Simulação - em um sistema real, isso seria uma API de geolocalização
+    // This is a very basic simulation based on the first 5 digits of CEP
+    try {
+        const cepNum1 = parseInt(cep1.replace(/\D/g, '').substring(0, 5));
+        const cepNum2 = parseInt(cep2.replace(/\D/g, '').substring(0, 5));
+        const diff = Math.abs(cepNum1 - cepNum2);
+
+        if(diff < 5) return "Muito perto"; // Adjust ranges for potentially better simulation
+        if(diff < 50) return `${Math.max(1, Math.round(diff * 0.5))} km`; // Simulate some distance scaling
+        if(diff < 500) return `${Math.round(diff * 0.1)} km`;
+        return `${(diff / 100).toFixed(0)} km`; // Larger differences mean more distance
+    } catch (e) {
+        console.error("Erro ao calcular distância simulada:", e);
+        return "Distância desconhecida";
+    }
+}
+
+
+function displayBestMarketResults(marketStats) {
+    const resultsContainer = document.getElementById('results');
+    if(marketStats.length === 0) {
+        resultsContainer.innerHTML = '<div class="card"><p>Nenhum supermercado encontrado com os itens da sua lista.</p></div>';
+        return;
+    }
+
+    // O melhor mercado é o primeiro da lista ordenada
+    const bestMarket = marketStats[0];
+
+    // Para cada item da lista do cliente, encontre o melhor produto correspondente no melhor mercado
+    const itemDetails = currentUser.list.map(itemName => {
+        // Find the cheapest product for this item in the best market with stock > 0
+        const matchingProductsWithStock = bestMarket.products.filter(p =>
+            p.name.toLowerCase().includes(itemName.toLowerCase()) && p.stock > 0
+        );
+
+        if(matchingProductsWithStock.length === 0) {
+            return {
+                name: itemName,
+                status: 'not-found',
+                message: 'Produto não encontrado neste mercado',
+                price: null, // Indicate no price available
+                quantity: null,
+                unit: null,
+                onSale: false
+            };
+        }
+
+        // Ordena por preço e pega o mais barato
+        matchingProductsWithStock.sort((a, b) => a.price - b.price);
+        const cheapest = matchingProductsWithStock[0];
+
+        return {
+            name: cheapest.name,
+            price: cheapest.price,
+            stock: cheapest.stock,
+            status: getStockStatus(cheapest.stock),
+            onSale: cheapest.onSale,
+            quantity: cheapest.quantity,
+            unit: cheapest.unit
+        };
+    });
+
+
+    // Mostrar apenas o melhor mercado, com destaque
+    resultsContainer.innerHTML = `
+        <div class="card best-market">
+            <h2 style="color: var(--success);"><i class="fas fa-trophy"></i> Melhor Opção</h2>
+            ${bestMarket.market.logo ? `<img src="${bestMarket.market.logo}" class="market-logo" alt="${bestMarket.market.name}">` : ''}
+            <h3>${bestMarket.market.name}</h3>
+            <p><strong>Endereço:</strong> ${bestMarket.market.address}</p>
+            <p><strong>Telefone:</strong> ${bestMarket.market.phone || 'Não informado'}</p>
+            <p><strong>Distância:</strong> ${bestMarket.distance}</p>
+            <p><strong>Itens disponíveis:</strong> ${bestMarket.uniqueItemCount}/${currentUser.list.length} (${bestMarket.completeness}%)</p>
+            <p><strong>Preço total estimado para itens encontrados:</strong> R$ ${bestMarket.totalPrice.toFixed(2)}</p>
+
+
+            <h4>Detalhes dos Itens da sua Lista neste Supermercado:</h4>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <thead>
+                    <tr style="background: var(--primary); color: white;">
+                        <th style="padding: 8px; text-align: left;">Item</th>
+                        <th style="padding: 8px; text-align: left;">Preço</th>
+                        <th style="padding: 8px; text-align: left;">Disponibilidade</th>
+                         <th style="padding: 8px; text-align: left;">Detalhes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${itemDetails.map(item => `
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 8px;">${item.name}</td>
+                            <td style="padding: 8px;">${item.price !== null ? `R$ ${item.price.toFixed(2)} ${item.onSale ? '<span style="color: var(--danger); font-weight: bold;">(OFERTA)</span>' : ''}` : '-'}</td>
+                            <td style="padding: 8px;"><span class="stock-badge ${item.status}">${getStatusText(item.status)}</span></td>
+                             <td style="padding: 8px;">${item.quantity ? `${item.quantity}${item.unit}` : ''}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+
+             ${marketStats.length > 1 ? `
+                <div style="margin-top: 20px; background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                    <h4>Economia estimada:</h4>
+                    <p>Comparado com o próximo supermercado na lista (${marketStats[1].market.name}), você pode economizar aproximadamente <strong>R$ ${(marketStats[1].totalPrice - bestMarket.totalPrice).toFixed(2)}</strong> escolhendo esta opção (baseado nos itens encontrados em ambos).</p>
+                </div>
+             ` : ''}
+
+        </div>
+
+        ${marketStats.slice(1).length > 0 ? `
+            <div class="card">
+                <h3>Outras opções (${marketStats.slice(1).length})</h3>
+                <p>Outros supermercados que possuem alguns itens da sua lista:</p>
+
+                ${marketStats.slice(1).map(market => `
+                    <div style="margin-top: 15px; padding: 10px; border: 1px solid #eee; border-radius: 8px;">
+                        ${market.market.logo ? `<img src="${market.market.logo}" class="market-logo" alt="${market.market.name}">` : ''}
+                        <h4>${market.market.name}</h4>
+                        <p>Itens da lista encontrados: ${market.uniqueItemCount}/${currentUser.list.length}</p>
+                        <p>Preço total estimado para itens encontrados: R$ ${market.totalPrice.toFixed(2)}</p>
+                        <p>Distância: ${market.distance}</p>
+                    </div>
+                `).join('')}
+            </div>
+        ` : ''}
+    `;
+}
+
+
+function getStockStatus(stock) {
+    if(stock === undefined || stock === null || isNaN(stock)) return 'not-found'; // Handle null, undefined or NaN stock
+    if(stock > 10) return 'in-stock';
+    if(stock > 0) return 'low-stock';
+    return 'out-of-stock';
+}
+
+function getStatusText(status) {
+    switch(status) {
+        case 'in-stock': return 'Disponível';
+        case 'low-stock': return 'Últimas unidades';
+        case 'out-of-stock': return 'Esgotado';
+        default: return 'Não encontrado neste mercado';
+    }
+}
+
+/**
+ * Handles logging out the current user (client, admin, or supermarket).
+ */
+function logout() {
+    currentUser = null;
+    isAdmin = false;
+    loggedInSupermarket = null;
+
+    // Show the login area
+    document.getElementById('loginArea').style.display = 'block';
+
+    // Hide all panel areas
+    document.getElementById('clientPanel').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'none';
+    document.getElementById('supermarketPanel').style.display = 'none';
+
+    // Clear fields and specific panel displays
+    document.getElementById('clientEmail').value = '';
+    document.getElementById('clientPassword').value = '';
+    document.getElementById('supermarketEmail').value = ''; // Clear supermarket login fields
+    document.getElementById('supermarketPassword').value = '';
+    document.getElementById('adminUser').value = '';
+    document.getElementById('adminPass').value = '';
+
+    document.getElementById('shoppingList').innerHTML = ''; // Clear client shopping list display
+    document.getElementById('results').innerHTML = ''; // Clear results display
+
+    // Clear specific admin/supermarket displays if visible
+    document.getElementById('adminMarkets').style.display = 'none';
+    document.getElementById('adminProducts').style.display = 'none';
+    document.getElementById('adminMarketing').style.display = 'none';
+    document.getElementById('adminBackup').style.display = 'none';
+    document.getElementById('adminSupermarketUsers').style.display = 'none';
+    document.getElementById('adminMarketDetail').style.display = 'none';
+    document.getElementById('supermarketMyDetails').style.display = 'none'; // Hide supermarket details
+    document.getElementById('supermarketMyProducts').style.display = 'none'; // Hide supermarket products
+    document.getElementById('myMarketDetailsContent').innerHTML = ''; // Clear superpower market details content
+    document.getElementById('supermarketProductList').innerHTML = ''; // Clear superpower market product list
+    document.getElementById('supermarketProductImportProgress').innerHTML = ''; // Clear superpower market import progress
+
+
+    // Reset login type selector and show client login tab
+    document.querySelector('input[name="loginType"][value="client"]').checked = true;
+    showLoginTab('clientLogin'); // Show client login tab
+
+    loadSpecialOffers(); // Reload offers for the logged-out view
+}
+</script>
+</body>
+</html>
